@@ -14,7 +14,7 @@ Tài liệu này phân chia công việc cho 4 thành viên (2 backend, 2 fronte
 
 ## 3) Phân Công Theo Thành Viên
 
-### Backend – Dev A (Auth, Users, Chính sách quyền)
+### Backend – Văn Quang (Auth, Users, Chính sách quyền)
 
 - Phạm vi thư mục
   - `backend/app/Http/Controllers/Api/V1/AuthController.php`
@@ -36,7 +36,7 @@ Tài liệu này phân chia công việc cho 4 thành viên (2 backend, 2 fronte
   - `GET /api/v1/me` trả `{id,name,email,role}` chính xác theo DB.
   - Endpoint `/users/*` kiểm soát quyền theo role.
 
-### Backend – Dev B (Classes, Sessions, Attendance, QR, Reports, Face)
+### Backend – Duy Khánh (Classes, Sessions, Attendance, QR, Reports, Face)
 
 - Phạm vi thư mục
   - `backend/app/Http/Controllers/Api/V1/{ClassesController.php,SessionsController.php,AttendanceController.php,QrController.php,ReportsController.php}`
@@ -63,7 +63,7 @@ Tài liệu này phân chia công việc cho 4 thành viên (2 backend, 2 fronte
   - `POST /api/v1/sessions/{id}/qr` trả `{svg, ttl}`; `POST /api/v1/attendance/scan-qr` trả `{session_token}`.
   - Excel/PDF tải về đúng nội dung, theo bộ lọc.
 
-### Frontend – Dev C (Auth, Shell, Routing, Core)
+### Frontend – Tạ Ngọc Hà (Auth, Shell, Routing, Core)
 
 - Phạm vi thư mục
   - `frontend/lib/features/auth/*`
@@ -83,7 +83,7 @@ Tài liệu này phân chia công việc cho 4 thành viên (2 backend, 2 fronte
   - Đăng nhập thành công: Snackbar + chuyển trang đúng; thất bại: Snackbar lỗi rõ ràng.
   - Tự refresh token khi 401; Logout xóa token và điều hướng về `/login`.
 
-### Frontend – Dev D (Features & Data Integration)
+### Frontend – Gia Khánh (Features & Data Integration)
 
 - Phạm vi thư mục
   - `frontend/lib/features/{classes,sessions,attendance,reports,qr}/`

@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\{
   AuthController, UsersController, ClassesController, SessionsController,
   AttendanceController, ReportsController, QrController
 };
+use App\Http\Controllers\Api\V1\FaceSamplesController;
 
 Route::prefix('v1')->group(function () {
   // Auth
@@ -48,6 +49,11 @@ Route::prefix('v1')->group(function () {
     // Attendance
     Route::post('/attendance/check-in', [AttendanceController::class, 'checkIn']); // multipart image + session_token
     Route::get('/attendance/history', [AttendanceController::class, 'history']);
+
+    // Face samples (enroll & manage own face embeddings)
+    Route::get('/face-samples', [FaceSamplesController::class, 'index']);
+    Route::post('/face-samples', [FaceSamplesController::class, 'store']);
+    Route::delete('/face-samples/{id}', [FaceSamplesController::class, 'destroy']);
 
     // Reports
     Route::get('/reports/attendance', [ReportsController::class, 'summary']);
