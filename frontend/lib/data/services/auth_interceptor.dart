@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 
+import '../../core/constants.dart';
 import 'secure_store.dart';
 
 class AuthInterceptor extends Interceptor {
@@ -8,13 +9,18 @@ class AuthInterceptor extends Interceptor {
 
   @override
   void onRequest(RequestOptions o, RequestInterceptorHandler h) async {
-    final t = await SecureStore.token();
-    if (t != null) o.headers['Authorization'] = 'Bearer $t';
+    if (!C.devAuthBypass) {
+      final t = await SecureStore.token();
+      if (t != null) o.headers['Authorization'] = 'Bearer $t';
+    }
     h.next(o);
   }
 
   @override
   void onError(DioException err, ErrorInterceptorHandler h) async {
+    if (C.devAuthBypass) {
+      return h.next(err);
+    }
     final sc = err.response?.statusCode ?? 0;
     final isRefresh = err.requestOptions.path.contains('/auth/refresh');
     if (sc == 401 && !isRefresh) {

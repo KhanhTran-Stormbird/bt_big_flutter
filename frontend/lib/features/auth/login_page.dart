@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
-import '../shell/shell_page.dart';
 import 'auth_controller.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
@@ -39,21 +39,37 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 onPressed: loading
                     ? null
                     : () async {
-                        // Lấy navigator trước async gap để tránh lint "context across async gaps"
-                        final navigator = Navigator.of(context);
-
                         setState(() => loading = true);
                         final ok = await ref
                             .read(authControllerProvider.notifier)
                             .login(email.text.trim(), pass.text);
 
-                        if (!mounted) return; // guard chuẩn
+                        if (!mounted) return;
                         setState(() => loading = false);
 
+                        final messenger = ScaffoldMessenger.of(context);
                         if (ok) {
-                          navigator.pushReplacement(
-                            MaterialPageRoute(
-                                builder: (_) => const ShellPage()),
+                          messenger.showSnackBar(
+                            const SnackBar(content: Text('Đăng nhập thành công')),
+                          );
+                          final u = ref.read(authControllerProvider).value;
+                          final role = (u?.role ?? 'student').toLowerCase();
+                          switch (role) {
+                            case 'admin':
+                              if (!mounted) return;
+                              context.go('/dashboard/admin');
+                              break;
+                            case 'lecturer':
+                              if (!mounted) return;
+                              context.go('/dashboard/lecturer');
+                              break;
+                            default:
+                              if (!mounted) return;
+                              context.go('/dashboard/student');
+                          }
+                        } else {
+                          messenger.showSnackBar(
+                            const SnackBar(content: Text('Đăng nhập thất bại. Vui lòng kiểm tra lại.')),
                           );
                         }
                       },

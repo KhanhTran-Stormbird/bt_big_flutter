@@ -4,11 +4,15 @@ import 'package:dio/dio.dart';
 import '../../data/models/attendance_model.dart';
 import '../services/api_client.dart';
 import '../services/auth_interceptor.dart';
+import '../../core/constants.dart';
 
 class AttendanceRepo {
   late final Dio _dio;
   AttendanceRepo() {
-    _dio = buildDio()..interceptors.add(AuthInterceptor(buildDio()));
+    _dio = buildDio();
+    if (!C.devAuthBypass) {
+      _dio.interceptors.add(AuthInterceptor(buildDio()));
+    }
   }
 
   Future<String> scanQr(String qrJson) async {

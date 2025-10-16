@@ -2,6 +2,7 @@
 // Mock trước một tài khoản sinh viên. Khi có API thật, đặt useMock=false.
 
 import 'package:dio/dio.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import '../models/user.dart'; // <- sửa path đúng
 import '../services/api_client.dart';
@@ -9,15 +10,18 @@ import '../services/auth_interceptor.dart';
 import '../services/secure_store.dart';
 
 class AuthRepo {
-  // BẬT/TẮT MOCK Ở ĐÂY
-  static const bool useMock = true;
+  // Tự động bật mock nếu DEV_AUTH_BYPASS=true trong .env
+  static bool get useMock =>
+      (dotenv.env['DEV_AUTH_BYPASS'] ?? 'false').toLowerCase() == 'true';
 
   late final Dio _dio;
   AuthRepo() {
     final base = buildDio();
-    final authDio = buildDio();
-    authDio.interceptors.add(AuthInterceptor(authDio));
-    base.interceptors.add(AuthInterceptor(authDio));
+    if (!useMock) {
+      final authDio = buildDio();
+      authDio.interceptors.add(AuthInterceptor(authDio));
+      base.interceptors.add(AuthInterceptor(authDio));
+    }
     _dio = base;
   }
 

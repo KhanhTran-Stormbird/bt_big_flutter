@@ -7,6 +7,9 @@ import 'features/attendance/result_page.dart';
 import 'features/auth/login_page.dart';
 import 'features/qr/scan_qr_page.dart';
 import 'features/shell/shell_page.dart';
+import 'features/dashboard/admin_dashboard_page.dart';
+import 'features/dashboard/lecturer_dashboard_page.dart';
+// Student dashboard is the first tab inside ShellPage.
 
 final appRouter = GoRouter(
   // initialLocation: '/login',
@@ -18,6 +21,18 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/',
       builder: (_, __) => const ShellPage(),
+    ),
+    GoRoute(
+      path: '/dashboard/student',
+      builder: (_, __) => const ShellPage(),
+    ),
+    GoRoute(
+      path: '/dashboard/lecturer',
+      builder: (_, __) => const LecturerDashboardPage(),
+    ),
+    GoRoute(
+      path: '/dashboard/admin',
+      builder: (_, __) => const AdminDashboardPage(),
     ),
     GoRoute(
       path: '/scan-qr',
