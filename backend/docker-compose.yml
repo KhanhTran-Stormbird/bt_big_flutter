@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   face_api:
     build:
@@ -36,8 +34,10 @@ services:
       timeout: 5s
       retries: 20
 
-  app:
-    image: webdevops/php-nginx:8.3
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
     depends_on:
       mysql:
         condition: service_healthy
@@ -57,19 +57,24 @@ services:
       DB_PASSWORD: attendance
       FACE_PROVIDER: http
       FACE_API_BASE: http://face_api:8000
+      PHP_OPCACHE_ENABLE: 1
+      PHP_OPCACHE_VALIDATE_TIMESTAMPS: 1
+      PHP_OPCACHE_REVALIDATE_FREQ: 2
+      PHP_OPCACHE_MAX_ACCELERATED_FILES: 20000
+      PHP_OPCACHE_MEMORY_CONSUMPTION: 192
+      PHP_XDEBUG_MODE: off
+      PHP_FPM_PM_MAX_CHILDREN: 10
     working_dir: /app
     volumes:
       - ./:/app
+      - vendor_data:/app/vendor
+      - cache_data:/app/bootstrap/cache
     ports:
       - "8080:80"
-    command: >
-      sh -lc "\
-        composer install --no-interaction --prefer-dist && \
-        if [ -z \"$(grep ^APP_KEY= .env | cut -d= -f2)\" ]; then php artisan key:generate --force; else echo 'APP_KEY exists'; fi && \
-        php artisan migrate --force && \
-        php artisan db:seed --force && \
-        supervisord -n"
+    # Uses Dockerfile CMD (docker-entrypoint.sh) to bootstrap and start services
 
 volumes:
   db_data:
   face_models:
+  vendor_data:
+  cache_data:

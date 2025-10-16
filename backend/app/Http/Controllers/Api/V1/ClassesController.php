@@ -4,29 +4,20 @@ namespace App\Http\Controllers\Api\V1;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use App\Models\ClassRoom;
 
 class ClassesController extends Controller
 {
     public function index()
     {
-        return response()->json([
-            [
-                'id' => 1,
-                'name' => 'CS101 - Intro to CS',
-                'subject' => 'Computer Science',
-                'term' => '2025A',
-            ],
-        ]);
+        $classes = ClassRoom::select('id', 'name', 'subject', 'term')->orderBy('id', 'desc')->get();
+        return response()->json($classes);
     }
 
     public function show($id)
     {
-        return response()->json([
-            'id' => (int) $id,
-            'name' => 'Class #'.$id,
-            'subject' => 'Subject',
-            'term' => '2025A',
-        ]);
+        $c = ClassRoom::select('id', 'name', 'subject', 'term')->findOrFail((int) $id);
+        return response()->json($c);
     }
 
     public function store(Request $request)

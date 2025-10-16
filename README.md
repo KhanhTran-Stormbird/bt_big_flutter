@@ -102,7 +102,7 @@ Tài liệu này phân chia công việc cho 4 thành viên (2 backend, 2 fronte
 - Tiêu chí nghiệm thu
   - Các trang lấy dữ liệu thực từ API; upload ảnh hoạt động; thông báo lỗi rõ ràng; luồng điều hướng mượt.
 
-## 4) API Routes (Tóm tắt)
+## 4) Hợp Đồng API (Tóm tắt)
 
 - Auth
   - `POST /api/v1/auth/login` `{email,password}` → `{access_token,token_type,expires_in}`
