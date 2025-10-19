@@ -1,3 +1,5 @@
+version: "3.9"
+
 services:
   face_api:
     build:
@@ -16,8 +18,10 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+
   mysql:
     image: mysql:8.0
+    container_name: mysql
     command: --default-authentication-plugin=mysql_native_password
     environment:
       MYSQL_ROOT_PASSWORD: root
@@ -38,6 +42,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: laravel_backend
     depends_on:
       mysql:
         condition: service_healthy
@@ -48,7 +53,7 @@ services:
       APP_ENV: ${APP_ENV}
       APP_DEBUG: ${APP_DEBUG}
       APP_URL: ${APP_URL}
-      APP_TIMEZONE: ${APP_TIMEZONE}
+      APP_TIMEZONE: ${APP_TIMEZONE:-Asia/Ho_Chi_Minh}
       DB_CONNECTION: mysql
       DB_HOST: mysql
       DB_PORT: 3306
@@ -57,13 +62,6 @@ services:
       DB_PASSWORD: attendance
       FACE_PROVIDER: http
       FACE_API_BASE: http://face_api:8000
-      PHP_OPCACHE_ENABLE: 1
-      PHP_OPCACHE_VALIDATE_TIMESTAMPS: 1
-      PHP_OPCACHE_REVALIDATE_FREQ: 2
-      PHP_OPCACHE_MAX_ACCELERATED_FILES: 20000
-      PHP_OPCACHE_MEMORY_CONSUMPTION: 192
-      PHP_XDEBUG_MODE: off
-      PHP_FPM_PM_MAX_CHILDREN: 10
     working_dir: /app
     volumes:
       - ./:/app
@@ -72,7 +70,8 @@ services:
       - storage_data:/app/storage
     ports:
       - "8080:80"
-    # Uses Dockerfile CMD (docker-entrypoint.sh) to bootstrap and start services
+    user: "www-data:www-data"
+    restart: unless-stopped
 
 volumes:
   db_data:

@@ -47,6 +47,10 @@ Route::prefix('v1')->group(function () {
     Route::delete('/classes/{id}', [ClassesController::class, 'destroy'])->middleware($manageClassesMiddleware);
     Route::post('/classes/{id}/students/import', [ClassesController::class, 'importStudents'])
       ->middleware($manageClassesMiddleware);
+    Route::post('/classes/{id}/students', [ClassesController::class, 'addStudent'])
+      ->middleware($manageClassesMiddleware);
+    Route::delete('/classes/{id}/students/{studentId}', [ClassesController::class, 'removeStudent'])
+      ->middleware($manageClassesMiddleware);
 
     // Sessions
     Route::get('/classes/{id}/sessions', [SessionsController::class, 'listByClass']);

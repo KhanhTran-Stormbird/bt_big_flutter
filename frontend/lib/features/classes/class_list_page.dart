@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/constants.dart';
 import '../../core/theme/colors.dart';
 import '../../core/utils/error_message.dart';
+import '../../core/utils/toast.dart';
 import '../../core/widgets/empty_view.dart';
 import '../../core/widgets/error_view.dart';
 import '../../core/widgets/loading_view.dart';
@@ -26,23 +27,42 @@ class _ClassListPageState extends ConsumerState<ClassListPage> {
   int? workingClassId;
 
   Future<void> _openClassForm({ClassModel? initial}) async {
-    final result = await showModalBottomSheet<bool>(
+    final result = await showModalBottomSheet<String?>(
       context: context,
       isScrollControlled: true,
       builder: (_) => ClassFormSheet(initial: initial),
     );
-    if (result == true && mounted) {
-      ref.invalidate(classListProvider);
+    if (!mounted) return;
+    if (result == null) return;
+
+    await _refreshClasses();
+
+    if (!mounted) return;
+    switch (result) {
+      case 'created':
+        showSuccessToast(context, 'Đã tạo lớp học');
+        break;
+      case 'updated':
+        showSuccessToast(context, 'Đã cập nhật lớp học');
+        break;
     }
   }
 
   Future<void> _createSession(ClassModel item) async {
-    final result = await showModalBottomSheet<bool>(
+    final result = await showModalBottomSheet<int?>(
       context: context,
       isScrollControlled: true,
       builder: (_) => SessionFormSheet(classId: item.id),
     );
-    if (result == true && mounted) {
+    if (!mounted) return;
+    if (result != null && result > 0) {
+      await _refreshClasses();
+      showSuccessToast(
+        context,
+        result == 1
+            ? 'Đã tạo 1 buổi học'
+            : 'Đã tạo $result buổi học',
+      );
       ref.invalidate(classDetailProvider(item.id));
     }
   }
@@ -74,8 +94,10 @@ class _ClassListPageState extends ConsumerState<ClassListPage> {
     setState(() => workingClassId = null);
     final messenger = ScaffoldMessenger.of(context);
     if (ok) {
-      messenger.showSnackBar(const SnackBar(content: Text('Đã xóa lớp học')));
-      ref.invalidate(classListProvider);
+      await _refreshClasses();
+      if (mounted) {
+        showSuccessToast(context, 'Đã xóa lớp học');
+      }
     } else if (state.hasError) {
       messenger.showSnackBar(
         SnackBar(content: Text(extractErrorMessage(state.error!))),
@@ -85,6 +107,7 @@ class _ClassListPageState extends ConsumerState<ClassListPage> {
 
   Future<void> _importCsv(ClassModel item) async {
     final result = await FilePicker.platform.pickFiles(
+      withData: true,
       type: FileType.custom,
       allowedExtensions: const ['csv'],
     );
@@ -100,11 +123,13 @@ class _ClassListPageState extends ConsumerState<ClassListPage> {
     setState(() => workingClassId = null);
     final messenger = ScaffoldMessenger.of(context);
     if (ok) {
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text('Đã nhập danh sách sinh viên cho ${item.name}'),
-        ),
-      );
+      await _refreshClasses();
+      if (mounted) {
+        showSuccessToast(
+          context,
+          'Đã nhập danh sách sinh viên cho ${item.name}',
+        );
+      }
     } else if (state.hasError) {
       messenger.showSnackBar(
         SnackBar(content: Text(extractErrorMessage(state.error!))),
@@ -121,10 +146,7 @@ class _ClassListPageState extends ConsumerState<ClassListPage> {
 
     return classesAsync.when(
       data: (classes) => RefreshIndicator(
-        onRefresh: () async {
-          ref.invalidate(classListProvider);
-          await ref.read(classListProvider.future);
-        },
+        onRefresh: _refreshClasses,
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
           physics: const AlwaysScrollableScrollPhysics(),
@@ -274,6 +296,14 @@ class _ClassListPageState extends ConsumerState<ClassListPage> {
       ),
     );
   }
+
+  Future<void> _refreshClasses() async {
+    try {
+      await ref.refresh(classListProvider.future);
+    } catch (_) {
+      // Let the UI provider surface the error via ErrorView.
+    }
+  }
 }
 
 class _AdminActions extends StatelessWidget {
@@ -298,3 +328,4 @@ class _AdminActions extends StatelessWidget {
     );
   }
 }
+

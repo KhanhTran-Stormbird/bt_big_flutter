@@ -1,11 +1,8 @@
-import 'dart:io';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:open_filex/open_filex.dart';
-import 'package:path_provider/path_provider.dart';
 
 import '../../data/models/report_model.dart';
 import '../../data/repositories/report_repo.dart';
+import '../../core/utils/report_exporter.dart';
 
 final reportRepoProvider = Provider((ref) => ReportRepo());
 
@@ -32,21 +29,13 @@ class ReportActionController extends StateNotifier<AsyncValue<void>> {
     String? path;
     state = await AsyncValue.guard(() async {
       final bytes = await _repo.export(format: format, classId: classId);
-      final dir = await getTemporaryDirectory();
-      final filePath =
-          '${dir.path}/attendance_report_${DateTime.now().millisecondsSinceEpoch}.$format';
-      final file = File(filePath);
-      await file.writeAsBytes(bytes, flush: true);
-      path = file.path;
+      path = await saveReportFile(bytes, format);
     });
-    if (!state.hasError && path != null) {
-      await OpenFilex.open(path!);
-    }
     return path;
   }
 }
 
 final reportActionControllerProvider =
-    StateNotifierProvider.autoDispose<ReportActionController, AsyncValue<void>>(
+    StateNotifierProvider<ReportActionController, AsyncValue<void>>(
   (ref) => ReportActionController(ref),
 );

@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../../core/constants.dart';
 import '../../core/utils/error_message.dart';
+import '../../core/utils/toast.dart';
 import '../../core/widgets/error_view.dart';
 import '../../core/widgets/loading_view.dart';
 import '../../data/models/session_model.dart';
@@ -80,12 +81,10 @@ class SessionDetailPage extends ConsumerWidget {
       );
       if (!context.mounted) return;
       final state = ref.read(sessionActionControllerProvider);
-      final messenger = ScaffoldMessenger.of(context);
-      if (ok) {
-        messenger.showSnackBar(
-          const SnackBar(content: Text('Da dong buoi hoc')),
-        );
-      } else if (state.hasError) {
+        final messenger = ScaffoldMessenger.of(context);
+        if (ok) {
+          showSuccessToast(context, 'Đã đóng buổi học');
+        } else if (state.hasError) {
         messenger.showSnackBar(
           SnackBar(content: Text(extractErrorMessage(state.error!))),
         );

@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -32,7 +30,7 @@ class ClassActionController extends StateNotifier<AsyncValue<void>> {
     required String name,
     required String subject,
     required String term,
-    int? lecturerId,
+    required int lecturerId,
   }) async {
     state = const AsyncLoading<void>();
     state = await AsyncValue.guard(() async {
@@ -77,8 +75,11 @@ class ClassActionController extends StateNotifier<AsyncValue<void>> {
     required FilePickerResult result,
   }) async {
     final file = result.files.first;
-    if (file.path == null) {
-      final error = Exception('Không thể đọc tệp đã chọn');
+    final bytes = file.bytes;
+    if (bytes == null) {
+      final error = Exception(
+        'Không thể đọc tệp đã chọn. Vui lòng bật tùy chọn tải dữ liệu (withData: true) hoặc chọn tệp khác.',
+      );
       final stack = StackTrace.current;
       logAppError('ClassActionController.importStudents', error, stack);
       state = AsyncError(error, stack);
@@ -88,15 +89,68 @@ class ClassActionController extends StateNotifier<AsyncValue<void>> {
     state = await AsyncValue.guard(() async {
       await _repo.importStudents(
         classId: classId,
-        file: File(file.path!),
+        bytes: bytes,
         fileName: file.name,
       );
+      try {
+        await ref.refresh(classDetailProvider(classId).future);
+      } catch (_) {}
+    });
+    return !state.hasError;
+  }
+
+  Future<bool> addStudent({
+    required int classId,
+    String? email,
+    int? studentId,
+  }) async {
+    state = const AsyncLoading<void>();
+    state = await AsyncValue.guard(() async {
+      await _repo.addStudent(
+        classId: classId,
+        email: email,
+        studentId: studentId,
+      );
+      try {
+        await ref.refresh(classDetailProvider(classId).future);
+      } catch (_) {}
+    });
+    return !state.hasError;
+  }
+
+  Future<bool> updateStudent({
+    required int classId,
+    required int studentId,
+    required String newEmail,
+  }) async {
+    state = const AsyncLoading<void>();
+    state = await AsyncValue.guard(() async {
+      await _repo.addStudent(classId: classId, email: newEmail);
+      await _repo.removeStudent(classId: classId, studentId: studentId);
+      try {
+        await ref.refresh(classDetailProvider(classId).future);
+      } catch (_) {}
+    });
+    return !state.hasError;
+  }
+
+  Future<bool> removeStudent({
+    required int classId,
+    required int studentId,
+  }) async {
+    state = const AsyncLoading<void>();
+    state = await AsyncValue.guard(() async {
+      await _repo.removeStudent(classId: classId, studentId: studentId);
+      try {
+        await ref.refresh(classDetailProvider(classId).future);
+      } catch (_) {}
     });
     return !state.hasError;
   }
 }
 
 final classActionControllerProvider =
-    StateNotifierProvider.autoDispose<ClassActionController, AsyncValue<void>>(
+    StateNotifierProvider<ClassActionController, AsyncValue<void>>(
   (ref) => ClassActionController(ref),
 );
+

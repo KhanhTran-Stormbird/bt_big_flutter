@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/colors.dart';
 import '../classes/class_list_page.dart';
 import '../reports/report_summary_page.dart';
+import '../users/user_management_page.dart';
 import 'admin_dashboard_page.dart';
 import 'admin_profile_page.dart';
 
@@ -20,6 +21,7 @@ class _AdminHomePageState extends ConsumerState<AdminHomePage> {
 
   static const _pages = [
     AdminDashboardPage(),
+    UserManagementPage(),
     ClassListPage(),
     ReportSummaryPage(),
     AdminProfilePage(),
@@ -27,6 +29,7 @@ class _AdminHomePageState extends ConsumerState<AdminHomePage> {
 
   static const _titles = [
     'Trang chủ',
+    'Người dùng',
     'Lớp học',
     'Báo cáo',
     'Tôi',
@@ -88,6 +91,11 @@ class _AdminHomePageState extends ConsumerState<AdminHomePage> {
                   icon: Icon(Icons.home_outlined),
                   selectedIcon: Icon(Icons.home),
                   label: 'Trang chủ',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.people_outline),
+                  selectedIcon: Icon(Icons.people),
+                  label: 'Người dùng',
                 ),
                 NavigationDestination(
                   icon: Icon(Icons.class_outlined),

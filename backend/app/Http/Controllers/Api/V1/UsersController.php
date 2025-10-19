@@ -3,9 +3,13 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Users\StoreUserRequest;
+use App\Http\Requests\Users\UpdateUserRequest;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Response;
 
 class UsersController extends Controller
 {
@@ -49,14 +53,15 @@ class UsersController extends Controller
     {
         $data = $request->validated();
 
+        $data['role'] = strtolower($data['role']);
         $data['password'] = Hash::make($data['password']);
 
         $user = User::query()->create($data);
 
         return Response::json([
             'message' => 'User created successfully',
-            'data'    => $user,
-        ]);
+            'data' => $user->only(['id', 'name', 'email', 'role']),
+        ], 201);
     }
 
     /**
@@ -74,11 +79,15 @@ class UsersController extends Controller
             $data['password'] = Hash::make($data['password']);
         }
 
+        if (isset($data['role'])) {
+            $data['role'] = strtolower($data['role']);
+        }
+
         $user->update($data);
 
         return Response::json([
             'message' => 'User updated successfully',
-            'data'    => $user,
+            'data' => $user->only(['id', 'name', 'email', 'role']),
         ]);
     }
 
@@ -90,6 +99,6 @@ class UsersController extends Controller
         $user = User::query()->findOrFail($id);
         $user->delete();
 
-        return Response::json(['message' => 'User deleted successfully']);
+        return Response::json(['message' => 'User deleted successfully'], 200);
     }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/utils/error_message.dart';
+import '../../core/utils/toast.dart';
 import '../../core/widgets/error_view.dart';
 import '../../core/widgets/loading_view.dart';
 import '../../data/models/report_model.dart';
@@ -38,8 +39,9 @@ class _ReportSummaryPageState extends ConsumerState<ReportSummaryPage> {
           SnackBar(content: Text(extractErrorMessage(state.error!))),
         );
       } else if (path != null) {
-        messenger.showSnackBar(
-          SnackBar(content: Text('Đã tải file: $path')),
+        showSuccessToast(
+          context,
+          'Đã xuất báo cáo: $path',
         );
       }
     }

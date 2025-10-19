@@ -79,19 +79,17 @@ class _ScanQrPageState extends ConsumerState<ScanQrPage> {
               ),
             ),
           ),
-          Align(
+          const Align(
             alignment: Alignment.bottomCenter,
             child: Padding(
-              padding: const EdgeInsets.only(bottom: 32),
-              child: FilledButton(
-                style: FilledButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.black,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+              padding: EdgeInsets.only(bottom: 40),
+              child: Text(
+                'Đưa mã QR vào khung để tiếp tục điểm danh',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontWeight: FontWeight.w500,
                 ),
-                onPressed: scanning ? null : () {},
-                child: const Text('Chọn hình QR có sẵn'),
+                textAlign: TextAlign.center,
               ),
             ),
           ),

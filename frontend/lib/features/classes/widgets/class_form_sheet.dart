@@ -67,23 +67,16 @@ class _ClassFormSheetState extends ConsumerState<ClassFormSheet> {
             name: nameCtrl.text.trim(),
             subject: subjectCtrl.text.trim(),
             term: termCtrl.text.trim(),
-            lecturerId: lecturerId,
+            lecturerId: lecturerId!,
           );
     final state = ref.read(classActionControllerProvider);
     if (!mounted) return;
     setState(() => submitting = false);
-    final messenger = ScaffoldMessenger.of(context);
     if (ok) {
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(
-            widget.isEdit ? 'Đã cập nhật lớp học' : 'Đã tạo lớp học',
-          ),
-        ),
-      );
       if (!mounted) return;
-      Navigator.of(context).pop(true);
+      Navigator.of(context).pop(widget.isEdit ? 'updated' : 'created');
     } else {
+      final messenger = ScaffoldMessenger.of(context);
       final message = state.hasError
           ? extractErrorMessage(state.error!)
           : 'Không thể lưu lớp học.';

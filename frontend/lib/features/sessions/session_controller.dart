@@ -37,17 +37,19 @@ class SessionActionController extends StateNotifier<AsyncValue<void>> {
 
   Future<bool> create({
     required int classId,
-    required DateTime startsAt,
-    required DateTime endsAt,
+    required List<({DateTime start, DateTime end})> slots,
   }) async {
+    if (slots.isEmpty) return false;
     state = const AsyncLoading<void>();
     state = await AsyncValue.guard(() async {
-      await _repo.create(
-        classId: classId,
-        startsAt: startsAt,
-        endsAt: endsAt,
-      );
-      ref.invalidate(sessionListProvider(classId));
+      for (final slot in slots) {
+        await _repo.create(
+          classId: classId,
+          startsAt: slot.start,
+          endsAt: slot.end,
+        );
+      }
+      await ref.refresh(sessionListProvider(classId).future);
     });
     return !state.hasError;
   }
@@ -59,13 +61,13 @@ class SessionActionController extends StateNotifier<AsyncValue<void>> {
     state = const AsyncLoading<void>();
     state = await AsyncValue.guard(() async {
       await _repo.close(sessionId);
-      ref.invalidate(sessionListProvider(classId));
-      ref.invalidate(sessionDetailProvider(sessionId));
+      await ref.refresh(sessionListProvider(classId).future);
+      await ref.refresh(sessionDetailProvider(sessionId).future);
     });
     return !state.hasError;
   }
 }
 
-final sessionActionControllerProvider = StateNotifierProvider.autoDispose<
-    SessionActionController,
-    AsyncValue<void>>((ref) => SessionActionController(ref));
+final sessionActionControllerProvider =
+    StateNotifierProvider<SessionActionController, AsyncValue<void>>(
+        (ref) => SessionActionController(ref));

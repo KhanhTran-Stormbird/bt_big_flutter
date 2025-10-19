@@ -270,7 +270,7 @@ extension MockRoleExt on MockRole {
       case MockRole.lecturer:
         return 'Nhập email giảng viên';
       case MockRole.student:
-        return 'Nhập mã sinh viên';
+        return 'Nhập email sinh viên';
     }
   }
 

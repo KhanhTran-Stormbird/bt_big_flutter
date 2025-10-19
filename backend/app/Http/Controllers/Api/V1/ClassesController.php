@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Repositories\ClassRepository;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 use App\Models\ClassRoom;
+use App\Repositories\ClassRepository;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class ClassesController extends Controller
 {
@@ -97,8 +97,9 @@ class ClassesController extends Controller
         $file = $request->file('file');
         // Using a simple approach without a dedicated import class for now
         $csvData = array_map('str_getcsv', file($file->getRealPath()));
-        $header = array_shift($csvData);
-        $emailColumn = array_search('email', array_map('strtolower', $header));
+        $header = array_map(fn ($value) => strtolower(trim($value)), array_shift($csvData));
+        $emailColumn = array_search('email', $header, true);
+        $nameColumn = array_search('name', $header, true);
 
         if ($emailColumn === false) {
             return response()->json(['message' => 'CSV file must contain an "email" column.'], 422);
@@ -106,9 +107,16 @@ class ClassesController extends Controller
 
         $studentsData = [];
         foreach ($csvData as $row) {
-            if (isset($row[$emailColumn])) {
-                $studentsData[] = ['email' => $row[$emailColumn]];
+            $email = $row[$emailColumn] ?? null;
+            if ($email === null || trim($email) === '') {
+                continue;
             }
+            $studentsData[] = [
+                'email' => trim($email),
+                'name' => $nameColumn !== false && isset($row[$nameColumn])
+                    ? trim($row[$nameColumn])
+                    : null,
+            ];
         }
 
         $count = $this->classRepository->importStudents($id, $studentsData);
@@ -116,8 +124,49 @@ class ClassesController extends Controller
         return response()->json(['message' => "Successfully imported {$count} students."]);
     }
 
+    public function addStudent(Request $request, int $id): JsonResponse
+    {
+        $class = $this->classRepository->findById($id);
+        if ($this->shouldAuthorize()) {
+            $this->authorize('update', $class);
+        }
+
+        $data = $request->validate([
+            'student_id' => 'nullable|integer|exists:users,id',
+            'email' => 'nullable|email',
+            'name' => 'nullable|string|max:255',
+        ]);
+
+        if (empty($data['student_id']) && empty($data['email'])) {
+            return response()->json([
+                'message' => 'student_id hoặc email là bắt buộc.',
+            ], 422);
+        }
+
+        $student = $this->classRepository->findStudentForEnrollment($data);
+        $student = $this->classRepository->addStudent($id, $student);
+
+        return response()->json([
+            'message' => 'Student added to class.',
+            'data' => $student->only(['id', 'name', 'email', 'role']),
+        ], 201);
+    }
+
+    public function removeStudent(int $id, int $studentId): JsonResponse
+    {
+        $class = $this->classRepository->findById($id);
+        if ($this->shouldAuthorize()) {
+            $this->authorize('update', $class);
+        }
+
+        $this->classRepository->removeStudent($id, $studentId);
+
+        return response()->json(null, 204);
+    }
+
     protected function shouldAuthorize(): bool
     {
         return (bool) config('api.require_auth', false);
     }
 }
+

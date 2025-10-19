@@ -1,3 +1,5 @@
+import 'user.dart';
+
 class ClassModel {
   final int id;
   final String name;
@@ -6,6 +8,7 @@ class ClassModel {
   final int? lecturerId;
   final String? lecturerName;
   final String? lecturerEmail;
+  final List<User> students;
 
   ClassModel({
     required this.id,
@@ -15,10 +18,19 @@ class ClassModel {
     this.lecturerId,
     this.lecturerName,
     this.lecturerEmail,
+    this.students = const [],
   });
 
   factory ClassModel.fromJson(Map<String, dynamic> j) {
     final lecturer = j['lecturer'];
+    final rawStudents = j['students'];
+    final students = rawStudents is List
+        ? rawStudents
+            .whereType<Map<String, dynamic>>()
+            .map(User.fromJson)
+            .toList()
+        : <User>[];
+
     return ClassModel(
       id: j['id'] ?? 0,
       name: j['name'] ?? '',
@@ -29,6 +41,7 @@ class ClassModel {
           (lecturer is Map<String, dynamic> ? lecturer['name'] : null),
       lecturerEmail: j['lecturer_email'] ??
           (lecturer is Map<String, dynamic> ? lecturer['email'] : null),
+      students: students,
     );
   }
 }
