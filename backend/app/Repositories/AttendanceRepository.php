@@ -81,18 +81,31 @@ class AttendanceRepository
 
     public function getHistory(array $filters)
     {
-        $query = Attendance::with('student', 'session.classRoom');
+        $query = DB::table('attendances as a')
+            ->join('class_sessions as cs', 'a.session_id', '=', 'cs.id')
+            ->join('classes as c', 'cs.class_id', '=', 'c.id')
+            ->select(
+                'a.id',
+                'a.session_id',
+                'a.student_id',
+                'a.status',
+                'a.checked_at',
+                'a.distance',
+                'cs.starts_at as session_starts_at',
+                'cs.ends_at as session_ends_at',
+                'c.id as class_id',
+                'c.name as class_name',
+                'c.subject as class_subject'
+            );
 
         if (isset($filters['class_id'])) {
-            $query->whereHas('session', function ($q) use ($filters) {
-                $q->where('class_id', $filters['class_id']);
-            });
+            $query->where('cs.class_id', $filters['class_id']);
         }
 
         if (isset($filters['student_id'])) {
-            $query->where('student_id', $filters['student_id']);
+            $query->where('a.student_id', $filters['student_id']);
         }
 
-        return $query->orderBy('checked_at', 'desc')->paginate();
+        return $query->orderBy('a.checked_at', 'desc')->get();
     }
 }

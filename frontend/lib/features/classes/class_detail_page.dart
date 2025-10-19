@@ -39,7 +39,7 @@ class ClassDetailPage extends ConsumerWidget {
 
     if (detailAsync.hasError && classData == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Chi tiet lop hoc')),
+        appBar: AppBar(title: const Text('Chi tiết lớp học')),
         body: ErrorView(
           message: extractErrorMessage(detailAsync.error!),
           onRetry: () => ref.invalidate(classDetailProvider(classId)),
@@ -49,13 +49,13 @@ class ClassDetailPage extends ConsumerWidget {
 
     if (detailAsync.isLoading && classData == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Chi tiet lop hoc')),
-        body: const LoadingView(message: 'Dang tai thong tin lop hoc...'),
+        appBar: AppBar(title: const Text('Chi tiết lớp học')),
+        body: const LoadingView(message: 'Đang tải thông tin lớp học...'),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text(classData?.name ?? 'Chi tiet lop hoc')),
+      appBar: AppBar(title: Text(classData?.name ?? 'Chi tiết lớp học')),
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(classDetailProvider(classId));
@@ -90,10 +90,10 @@ class _ClassInfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (loading && model == null) {
-      return const LoadingView(message: 'Dang tai thong tin lop hoc...');
+      return const LoadingView(message: 'Đang tải thông tin lớp học...');
     }
     if (model == null) {
-      return const EmptyView(message: 'Khong tim thay thong tin lop.');
+      return const EmptyView(message: 'Không tìm thấy thông tin lớp.');
     }
     return Card(
       elevation: 0,
@@ -107,7 +107,7 @@ class _ClassInfoCard extends StatelessWidget {
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 8),
-            Text('Mon hoc: ${model!.subject}'),
+            Text('Môn học: ${model!.subject}'),
             Text('Học kỳ: ${model!.term}'),
             if ((model!.lecturerName ?? '').isNotEmpty)
               Text(
@@ -140,7 +140,7 @@ class SessionListSection extends ConsumerWidget {
         canManage: canManage,
       ),
       loading: () =>
-          const LoadingView(message: 'Dang tai danh sach buoi hoc...'),
+          const LoadingView(message: 'Đang tải danh sách buổi học...'),
       error: (error, _) => ErrorView(
         message: extractErrorMessage(error),
         onRetry: () => ref.invalidate(sessionListProvider(classId)),
@@ -178,16 +178,16 @@ class _SessionListContent extends ConsumerWidget {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('Dong buoi hoc'),
-          content: Text('Ban co chac muon dong buoi ${session.id}?'),
+          title: const Text('Đóng buổi học'),
+          content: Text('Bạn có chắc muốn đóng buổi ${session.id}?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(false),
-              child: const Text('Huy'),
+              child: const Text('Hủy'),
             ),
             FilledButton(
               onPressed: () => Navigator.of(ctx).pop(true),
-              child: const Text('Dong'),
+              child: const Text('Đóng'),
             ),
           ],
         ),
@@ -203,7 +203,7 @@ class _SessionListContent extends ConsumerWidget {
       final messenger = ScaffoldMessenger.of(context);
       if (ok) {
         messenger.showSnackBar(
-          SnackBar(content: Text('Da dong buoi #${session.id}')),
+          SnackBar(content: Text('Đã đóng buổi #${session.id}')),
         );
       } else if (state.hasError) {
         messenger.showSnackBar(
@@ -218,7 +218,7 @@ class _SessionListContent extends ConsumerWidget {
         Row(
           children: [
             Text(
-              'Danh sach buoi hoc',
+              'Danh sách buổi học',
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const Spacer(),
@@ -226,18 +226,18 @@ class _SessionListContent extends ConsumerWidget {
               TextButton.icon(
                 onPressed: openCreateSession,
                 icon: const Icon(Icons.add),
-                label: const Text('Tao buoi'),
+                label: const Text('Tạo buổi'),
               ),
           ],
         ),
         const SizedBox(height: 8),
         if (sessions.isEmpty)
           EmptyView(
-            message: 'Chua co buoi hoc nao.',
+            message: 'Chưa có buổi học nào.',
             action: canManage
                 ? FilledButton(
                     onPressed: openCreateSession,
-                    child: const Text('Tao buoi dau tien'),
+                    child: const Text('Tạo buổi đầu tiên'),
                   )
                 : null,
           )
@@ -252,14 +252,14 @@ class _SessionListContent extends ConsumerWidget {
                   '${formatter.format(s.startsAt)} - ${formatter.format(s.endsAt)}',
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
-                subtitle: Text('Trang thai: $statusLabel'),
+                subtitle: Text('Trạng thái: $statusLabel'),
                 onTap: () => context.push('/sessions/${s.id}', extra: s),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
                       icon: const Icon(Icons.qr_code_2),
-                      tooltip: 'Ma QR',
+                      tooltip: 'Mã QR',
                       onPressed: () =>
                           context.push('/sessions/${s.id}/qr', extra: s),
                     ),
@@ -273,7 +273,7 @@ class _SessionListContent extends ConsumerWidget {
                         itemBuilder: (_) => const [
                           PopupMenuItem(
                             value: 'close',
-                            child: Text('Dong buoi'),
+                            child: Text('Đóng buổi'),
                           ),
                         ],
                       ),
@@ -290,11 +290,11 @@ class _SessionListContent extends ConsumerWidget {
 String _statusLabel(String status) {
   switch (status) {
     case 'open':
-      return 'Dang dien ra';
+      return 'Đang diễn ra';
     case 'closed':
-      return 'Da dong';
+      return 'Đã đóng';
     case 'scheduled':
     default:
-      return 'Chua bat dau';
+      return 'Chưa bắt đầu';
   }
 }

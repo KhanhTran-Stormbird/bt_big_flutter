@@ -2,12 +2,40 @@
 
 namespace App\Repositories;
 
-use App\Models\ClassRoom;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class ReportRepository
 {
-    public function getAttendanceSummary(array $filters)
+    public function getAttendanceSummary(array $filters): array
+    {
+        $sessionQuery = DB::table('class_sessions as cs');
+        if (!empty($filters['class_id'])) {
+            $sessionQuery->where('cs.class_id', $filters['class_id']);
+        }
+        $totalSessions = (int) $sessionQuery->count();
+
+        $attendanceQuery = DB::table('attendances as a')
+            ->join('class_sessions as cs', 'a.session_id', '=', 'cs.id');
+
+        if (!empty($filters['class_id'])) {
+            $attendanceQuery->where('cs.class_id', $filters['class_id']);
+        }
+
+        $counts = $attendanceQuery->selectRaw("
+                SUM(CASE WHEN a.status = 'present' THEN 1 ELSE 0 END) as total_present,
+                SUM(CASE WHEN a.status = 'absent' THEN 1 ELSE 0 END) as total_absent
+            ")
+            ->first();
+
+        return [
+            'total_sessions' => $totalSessions,
+            'total_present' => (int) ($counts->total_present ?? 0),
+            'total_absent' => (int) ($counts->total_absent ?? 0),
+        ];
+    }
+
+    public function getAttendanceDetails(array $filters): Collection
     {
         $query = DB::table('attendances as a')
             ->join('users as u', 'a.student_id', '=', 'u.id')

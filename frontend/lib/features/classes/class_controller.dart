@@ -78,7 +78,7 @@ class ClassActionController extends StateNotifier<AsyncValue<void>> {
   }) async {
     final file = result.files.first;
     if (file.path == null) {
-      final error = Exception('Khong the doc tep da chon');
+      final error = Exception('Không thể đọc tệp đã chọn');
       final stack = StackTrace.current;
       logAppError('ClassActionController.importStudents', error, stack);
       state = AsyncError(error, stack);
