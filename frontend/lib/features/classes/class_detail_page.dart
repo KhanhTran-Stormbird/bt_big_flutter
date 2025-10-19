@@ -108,7 +108,12 @@ class _ClassInfoCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text('Mon hoc: ${model!.subject}'),
-            Text('Hoc ky: ${model!.term}'),
+            Text('Học kỳ: ${model!.term}'),
+            if ((model!.lecturerName ?? '').isNotEmpty)
+              Text(
+                'Giảng viên: ${model!.lecturerName}'
+                '${(model!.lecturerEmail ?? '').isNotEmpty ? ' (${model!.lecturerEmail})' : ''}',
+              ),
           ],
         ),
       ),

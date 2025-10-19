@@ -6,7 +6,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_web_plugins:
-    sdk: flutter   # <--- thêm dòng này
+    sdk: flutter
 
   go_router: ^14.2.7
   flutter_riverpod: ^2.5.1
@@ -28,6 +28,7 @@ dev_dependencies:
   flutter_lints: ^4.0.0
 
 flutter:
+  uses-material-design: true
   assets:
     - .env
     - assets/images/logo_tlu.png

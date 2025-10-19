@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../core/utils/error_message.dart';
-import '../../core/utils/logger.dart';
 import '../../core/widgets/error_view.dart';
 import '../attendance/attendance_controller.dart';
 
@@ -34,7 +33,7 @@ class _CapturePageState extends ConsumerState<CapturePage>
   Future<void> _initCamera() async {
     if (widget.sessionToken == null) {
       setState(() {
-        error = 'Thieu session token.';
+        error = 'Thiếu session token.';
         initializing = false;
       });
       return;
@@ -42,7 +41,7 @@ class _CapturePageState extends ConsumerState<CapturePage>
     final status = await Permission.camera.request();
     if (!status.isGranted) {
       setState(() {
-        error = 'Can quyen camera de chup anh diem danh.';
+        error = 'Cần cấp quyền camera để điểm danh.';
         initializing = false;
       });
       return;
@@ -51,7 +50,7 @@ class _CapturePageState extends ConsumerState<CapturePage>
       final cameras = await availableCameras();
       if (cameras.isEmpty) {
         setState(() {
-          error = 'Khong tim thay camera.';
+          error = 'Không tìm thấy camera.';
           initializing = false;
         });
         return;
@@ -71,8 +70,7 @@ class _CapturePageState extends ConsumerState<CapturePage>
         controller = ctrl;
         initializing = false;
       });
-    } catch (e, stack) {
-      logAppError('CapturePage._initCamera', e, stack);
+    } catch (e) {
       setState(() {
         error = extractErrorMessage(e);
         initializing = false;
@@ -123,8 +121,7 @@ class _CapturePageState extends ConsumerState<CapturePage>
           'imagePath': file.path,
         },
       );
-    } catch (e, stack) {
-      logNetworkError('CapturePage._takePicture', e, stack);
+    } catch (e) {
       messenger.showSnackBar(
         SnackBar(content: Text(extractErrorMessage(e))),
       );
@@ -158,28 +155,63 @@ class _CapturePageState extends ConsumerState<CapturePage>
     }
     if (controller == null || !controller!.value.isInitialized) {
       return const Scaffold(
-        body: Center(child: Text('Khong khoi tao duoc camera.')),
+        body: Center(child: Text('Không khởi tạo được camera.')),
       );
     }
 
+    final statusText =
+        busy ? 'Hệ thống đang nhận diện...' : 'Nhấn chụp để điểm danh';
+
     return Scaffold(
-      body: Stack(
-        children: [
-          CameraPreview(controller!),
-          Positioned(
-            bottom: 32,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: FloatingActionButton.large(
-                onPressed: busy ? null : _takePicture,
-                child: busy
-                    ? const CircularProgressIndicator()
-                    : const Icon(Icons.camera_alt),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF0B1221), Color(0xFF1F3A93)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Positioned.fill(child: CameraPreview(controller!)),
+            Container(
+              width: 280,
+              height: 360,
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: busy ? Colors.greenAccent : Colors.white,
+                  width: 4,
+                ),
               ),
             ),
-          ),
-        ],
+            Positioned(
+              bottom: 120,
+              child: Column(
+                children: [
+                  FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black,
+                      shape: const CircleBorder(),
+                      padding: const EdgeInsets.all(20),
+                    ),
+                    onPressed: busy ? null : _takePicture,
+                    child: const Icon(Icons.camera_alt, size: 28),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    statusText,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

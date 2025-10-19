@@ -36,12 +36,14 @@ class ClassRepo {
     required String name,
     required String subject,
     required String term,
+    int? lecturerId,
   }) async {
     await _wrap('create', () async {
       await _dio.post('/classes', data: {
         'name': name,
         'subject': subject,
         'term': term,
+        if (lecturerId != null) 'lecturer_id': lecturerId,
       });
     });
   }
@@ -51,12 +53,14 @@ class ClassRepo {
     required String name,
     required String subject,
     required String term,
+    int? lecturerId,
   }) async {
     await _wrap('update', () async {
       await _dio.put('/classes/$id', data: {
         'name': name,
         'subject': subject,
         'term': term,
+        if (lecturerId != null) 'lecturer_id': lecturerId,
       });
     });
   }

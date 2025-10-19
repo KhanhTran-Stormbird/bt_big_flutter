@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/constants.dart';
+import '../../core/theme/colors.dart';
 import '../../core/utils/error_message.dart';
 import '../../core/widgets/empty_view.dart';
 import '../../core/widgets/error_view.dart';
@@ -12,6 +13,7 @@ import '../../data/models/class_model.dart';
 import '../auth/auth_controller.dart';
 import 'class_controller.dart';
 import 'widgets/class_form_sheet.dart';
+import '../sessions/widgets/session_form_sheet.dart';
 
 class ClassListPage extends ConsumerStatefulWidget {
   const ClassListPage({super.key});
@@ -34,20 +36,31 @@ class _ClassListPageState extends ConsumerState<ClassListPage> {
     }
   }
 
+  Future<void> _createSession(ClassModel item) async {
+    final result = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => SessionFormSheet(classId: item.id),
+    );
+    if (result == true && mounted) {
+      ref.invalidate(classDetailProvider(item.id));
+    }
+  }
+
   Future<void> _confirmDelete(ClassModel item) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Xoa lop hoc'),
-        content: Text('Ban co chac muon xoa "${item.name}"?'),
+        title: const Text('Xóa lớp học'),
+        content: Text('Bạn có chắc muốn xóa "${item.name}"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Huy'),
+            child: const Text('Hủy'),
           ),
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Xoa'),
+            child: const Text('Xóa'),
           ),
         ],
       ),
@@ -61,7 +74,7 @@ class _ClassListPageState extends ConsumerState<ClassListPage> {
     setState(() => workingClassId = null);
     final messenger = ScaffoldMessenger.of(context);
     if (ok) {
-      messenger.showSnackBar(const SnackBar(content: Text('Da xoa lop hoc')));
+      messenger.showSnackBar(const SnackBar(content: Text('Đã xóa lớp học')));
       ref.invalidate(classListProvider);
     } else if (state.hasError) {
       messenger.showSnackBar(
@@ -88,7 +101,9 @@ class _ClassListPageState extends ConsumerState<ClassListPage> {
     final messenger = ScaffoldMessenger.of(context);
     if (ok) {
       messenger.showSnackBar(
-        SnackBar(content: Text('Da import sinh vien cho ${item.name}')),
+        SnackBar(
+          content: Text('Đã nhập danh sách sinh viên cho ${item.name}'),
+        ),
       );
     } else if (state.hasError) {
       messenger.showSnackBar(
@@ -118,64 +133,132 @@ class _ClassListPageState extends ConsumerState<ClassListPage> {
             if (classes.isEmpty)
               const Padding(
                 padding: EdgeInsets.only(top: 120),
-                child: EmptyView(message: 'Chua co lop hoc nao.'),
+                child: EmptyView(message: 'Chưa có lớp học nào.'),
               )
             else
               ...classes.map((item) {
                 final busy = workingClassId == item.id;
-                return Card(
-                  elevation: 0,
+                return Container(
                   margin: const EdgeInsets.only(bottom: 12),
-                  child: ListTile(
-                    title: Text(item.name),
-                    subtitle: Text('${item.subject} - ${item.term}'),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(18),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.05),
+                        blurRadius: 12,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(18),
                     onTap: () =>
                         context.push('/classes/${item.id}', extra: item),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 10,
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (busy)
-                          const SizedBox(
-                            height: 24,
-                            width: 24,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            backgroundColor:
+                                AppColors.primary.withValues(alpha: 0.1),
+                            child: const Icon(Icons.menu_book,
+                                color: AppColors.primary),
                           ),
-                        if (!busy && isAdmin)
-                          PopupMenuButton<String>(
-                            onSelected: (value) {
-                              switch (value) {
-                                case 'edit':
-                                  _openClassForm(initial: item);
-                                  break;
-                                case 'import':
-                                  _importCsv(item);
-                                  break;
-                                case 'delete':
-                                  _confirmDelete(item);
-                                  break;
-                              }
-                            },
-                            itemBuilder: (_) => const [
-                              PopupMenuItem(
-                                value: 'edit',
-                                child: Text('Chinh sua'),
-                              ),
-                              PopupMenuItem(
-                                value: 'import',
-                                child: Text('Import CSV'),
-                              ),
-                              PopupMenuItem(
-                                value: 'delete',
-                                child: Text('Xoa'),
-                              ),
-                            ],
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  item.name,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.textPrimary,
+                                      ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '${item.subject} • ${item.term}',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        color: AppColors.textPrimary
+                                            .withValues(alpha: 0.7),
+                                      ),
+                                ),
+                                if ((item.lecturerName ?? '').isNotEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 4),
+                                    child: Text(
+                                      'Giảng viên: ${item.lecturerName}',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            color: AppColors.textPrimary
+                                                .withValues(alpha: 0.6),
+                                          ),
+                                    ),
+                                  ),
+                              ],
+                            ),
                           ),
-                        if (!busy) const Icon(Icons.chevron_right),
-                      ],
+                          if (busy)
+                            const SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          else if (isAdmin)
+                            PopupMenuButton<String>(
+                              onSelected: (value) {
+                                switch (value) {
+                                  case 'edit':
+                                    _openClassForm(initial: item);
+                                    break;
+                                  case 'import':
+                                    _importCsv(item);
+                                    break;
+                                  case 'session':
+                                    _createSession(item);
+                                    break;
+                                  case 'delete':
+                                    _confirmDelete(item);
+                                    break;
+                                }
+                              },
+                              itemBuilder: (_) => const [
+                                PopupMenuItem(
+                                  value: 'edit',
+                                  child: Text('Chỉnh sửa'),
+                                ),
+                                PopupMenuItem(
+                                  value: 'import',
+                                  child: Text('Nhập CSV'),
+                                ),
+                                PopupMenuItem(
+                                  value: 'session',
+                                  child: Text('Tạo lịch học'),
+                                ),
+                                PopupMenuItem(
+                                  value: 'delete',
+                                  child: Text('Xóa'),
+                                ),
+                              ],
+                              icon: const Icon(Icons.more_vert),
+                            )
+                          else
+                            const Icon(Icons.chevron_right),
+                        ],
+                      ),
                     ),
                   ),
                 );
@@ -184,7 +267,7 @@ class _ClassListPageState extends ConsumerState<ClassListPage> {
         ),
       ),
       loading: () =>
-          const LoadingView(message: 'Dang tai danh sach lop hoc...'),
+          const LoadingView(message: 'Đang tải danh sách lớp học...'),
       error: (error, _) => ErrorView(
         message: extractErrorMessage(error),
         onRetry: () => ref.invalidate(classListProvider),
@@ -207,7 +290,7 @@ class _AdminActions extends StatelessWidget {
             child: FilledButton.icon(
               onPressed: onCreate,
               icon: const Icon(Icons.add),
-              label: const Text('Them lop hoc'),
+              label: const Text('Thêm lớp học'),
             ),
           ),
         ],

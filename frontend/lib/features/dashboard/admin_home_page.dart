@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/colors.dart';
-import '../attendance/history_page.dart';
 import '../classes/class_list_page.dart';
 import '../reports/report_summary_page.dart';
 import 'admin_dashboard_page.dart';
+import 'admin_profile_page.dart';
 
 class AdminHomePage extends ConsumerStatefulWidget {
   const AdminHomePage({super.key});
@@ -22,14 +22,14 @@ class _AdminHomePageState extends ConsumerState<AdminHomePage> {
     AdminDashboardPage(),
     ClassListPage(),
     ReportSummaryPage(),
-    HistoryPage(),
+    AdminProfilePage(),
   ];
 
   static const _titles = [
     'Trang chủ',
     'Lớp học',
     'Báo cáo',
-    'Lịch sử',
+    'Tôi',
   ];
 
   @override
@@ -100,9 +100,9 @@ class _AdminHomePageState extends ConsumerState<AdminHomePage> {
                   label: 'Báo cáo',
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.history_outlined),
-                  selectedIcon: Icon(Icons.history),
-                  label: 'Lịch sử',
+                  icon: Icon(Icons.person_outline),
+                  selectedIcon: Icon(Icons.person),
+                  label: 'Tôi',
                 ),
               ],
             ),

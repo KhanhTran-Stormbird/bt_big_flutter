@@ -3,10 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/colors.dart';
 import '../attendance/history_page.dart';
-import '../classes/class_list_page.dart';
 import '../qr/scan_qr_page.dart';
-import '../reports/report_summary_page.dart';
-import 'student_dashboard_page.dart';
+import 'student_profile_page.dart';
 
 class StudentHomePage extends ConsumerStatefulWidget {
   const StudentHomePage({super.key});
@@ -20,17 +18,15 @@ class _StudentHomePageState extends ConsumerState<StudentHomePage> {
   final PageStorageBucket _bucket = PageStorageBucket();
 
   static const _pages = [
-    StudentDashboardPage(),
-    ClassListPage(),
-    ScanQrPage(),
     HistoryPage(),
+    ScanQrPage(),
+    StudentProfilePage(),
   ];
 
   static const _titles = [
-    'Trang chủ',
-    'Lớp học',
-    'Điểm danh',
     'Lịch sử',
+    'Điểm danh',
+    'Tài khoản',
   ];
 
   @override
@@ -86,14 +82,9 @@ class _StudentHomePageState extends ConsumerState<StudentHomePage> {
               },
               destinations: const [
                 NavigationDestination(
-                  icon: Icon(Icons.home_outlined),
-                  selectedIcon: Icon(Icons.home),
-                  label: 'Trang chủ',
-                ),
-                NavigationDestination(
-                  icon: Icon(Icons.class_outlined),
-                  selectedIcon: Icon(Icons.class_),
-                  label: 'Lớp',
+                  icon: Icon(Icons.history_outlined),
+                  selectedIcon: Icon(Icons.history),
+                  label: 'Lịch sử',
                 ),
                 NavigationDestination(
                   icon: Icon(Icons.qr_code_scanner_outlined),
@@ -101,9 +92,9 @@ class _StudentHomePageState extends ConsumerState<StudentHomePage> {
                   label: 'Điểm danh',
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.history_outlined),
-                  selectedIcon: Icon(Icons.history),
-                  label: 'Lịch sử',
+                  icon: Icon(Icons.person_outline),
+                  selectedIcon: Icon(Icons.person),
+                  label: 'Tài khoản',
                 ),
               ],
             ),

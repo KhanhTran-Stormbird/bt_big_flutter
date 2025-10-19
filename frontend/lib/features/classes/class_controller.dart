@@ -32,6 +32,7 @@ class ClassActionController extends StateNotifier<AsyncValue<void>> {
     required String name,
     required String subject,
     required String term,
+    int? lecturerId,
   }) async {
     state = const AsyncLoading<void>();
     state = await AsyncValue.guard(() async {
@@ -39,6 +40,7 @@ class ClassActionController extends StateNotifier<AsyncValue<void>> {
         name: name,
         subject: subject,
         term: term,
+        lecturerId: lecturerId,
       );
     });
     return !state.hasError;
@@ -49,6 +51,7 @@ class ClassActionController extends StateNotifier<AsyncValue<void>> {
     required String name,
     required String subject,
     required String term,
+    int? lecturerId,
   }) async {
     state = const AsyncLoading<void>();
     state = await AsyncValue.guard(() async {
@@ -57,6 +60,7 @@ class ClassActionController extends StateNotifier<AsyncValue<void>> {
         name: name,
         subject: subject,
         term: term,
+        lecturerId: lecturerId,
       );
     });
     return !state.hasError;

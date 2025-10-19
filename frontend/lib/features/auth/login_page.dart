@@ -3,8 +3,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/colors.dart';
 import '../../../core/widgets/app_button.dart';
-import '../../../core/widgets/app_text_field.dart';
 import 'auth_controller.dart';
+
+// ignore: unused_element
+const _iconKeepAlive = <IconData>[
+  Icons.badge_outlined,
+  Icons.mail_outline,
+  Icons.account_circle_outlined,
+  Icons.visibility_outlined,
+  Icons.visibility_off_outlined,
+  Icons.lock_outline,
+  Icons.verified_user_outlined,
+  Icons.school_outlined,
+  Icons.person_outline,
+];
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});

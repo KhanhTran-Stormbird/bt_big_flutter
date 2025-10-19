@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../../core/utils/error_message.dart';
-import '../../core/utils/logger.dart';
 import '../attendance/attendance_controller.dart';
 
 class ScanQrPage extends ConsumerStatefulWidget {
@@ -29,8 +28,7 @@ class _ScanQrPageState extends ConsumerState<ScanQrPage> {
       final token = await repo.scanQr(raw);
       if (!mounted) return;
       await context.push('/capture', extra: token);
-    } catch (error, stack) {
-      logNetworkError('ScanQrPage._handleScan', error, stack);
+    } catch (error) {
       messenger.showSnackBar(
         SnackBar(content: Text(extractErrorMessage(error))),
       );
@@ -46,43 +44,64 @@ class _ScanQrPageState extends ConsumerState<ScanQrPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        MobileScanner(
-          onDetect: (capture) {
-            if (handled) return;
-            final barcode = capture.barcodes.firstWhere(
-              (b) => b.rawValue != null,
-              orElse: () => capture.barcodes.first,
-            );
-            final raw = barcode.rawValue;
-            if (raw != null) {
-              _handleScan(raw);
-            }
-          },
-        ),
-        const Align(
-          alignment: Alignment.topCenter,
-          child: Padding(
-            padding: EdgeInsets.all(16),
-            child: Text(
-              'Quet ma QR cua buoi hoc',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            ),
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
+        title: const Text('Quét mã QR'),
+        centerTitle: true,
+      ),
+      body: Stack(
+        children: [
+          MobileScanner(
+            onDetect: (capture) {
+              if (handled) return;
+              final barcode = capture.barcodes.firstWhere(
+                (b) => b.rawValue != null,
+                orElse: () => capture.barcodes.first,
+              );
+              final raw = barcode.rawValue;
+              if (raw != null) {
+                _handleScan(raw);
+              }
+            },
           ),
-        ),
-        if (scanning)
-          Container(
-            color: Colors.black54,
-            child: const Center(
-              child: SizedBox(
-                height: 64,
-                width: 64,
-                child: CircularProgressIndicator(),
+          Center(
+            child: Container(
+              width: 260,
+              height: 260,
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: scanning ? Colors.greenAccent : Colors.white,
+                  width: 4,
+                ),
               ),
             ),
           ),
-      ],
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 32),
+              child: FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.black,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                ),
+                onPressed: scanning ? null : () {},
+                child: const Text('Chọn hình QR có sẵn'),
+              ),
+            ),
+          ),
+          if (scanning)
+            const Align(
+              alignment: Alignment.center,
+              child: CircularProgressIndicator(color: Colors.white),
+            ),
+        ],
+      ),
     );
   }
 }
