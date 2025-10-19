@@ -63,24 +63,21 @@ Tài liệu này phân chia công việc cho 4 thành viên (2 backend, 2 fronte
   - `POST /api/v1/sessions/{id}/qr` trả `{svg, ttl}`; `POST /api/v1/attendance/scan-qr` trả `{session_token}`.
   - Excel/PDF tải về đúng nội dung, theo bộ lọc.
 
-### Frontend – Tạ Ngọc Hà (Auth, Shell, Routing, Core)
+### Frontend – Tạ Ngọc Hà (Auth, Routing, Core-Dashboard)
 
 - Phạm vi thư mục
   - `frontend/lib/features/auth/*`
-  - `frontend/lib/features/shell/*`
   - `frontend/lib/router.dart`
   - `frontend/lib/core/*` (constants, theme, widgets)
-  - `.env`, `.env.production`, `frontend/lib/main.dart`
+  - `.env`, `frontend/lib/main.dart`
   - Dịch vụ: `frontend/lib/data/services/{auth_interceptor.dart,secure_store.dart,api_client.dart}`
 - Nhiệm vụ
-  - Hoàn thiện Login UI/UX: hiển thị SnackBar thành công/thất bại; redirect theo role:
+  - Hoàn thiện Login UI/UX:
+    - login → `/login`.
     - admin → `/dashboard/admin`, lecturer → `/dashboard/lecturer`, còn lại → `/dashboard/student`.
-  - Lưu token vào `SecureStore`; `AuthInterceptor` tự gắn Bearer & tự refresh 401.
-  - Route guard: chưa đăng nhập → `/login`; đã đăng nhập → dashboard đúng vai trò.
-  - Xây skeleton dashboard cho Lecturer/Admin; Student dùng `ShellPage` dạng tabs.
   - Quản lý cấu hình bằng `.env` (flutter_dotenv) cho `API_BASE_URL`, `DEV_AUTH_BYPASS`.
 - Tiêu chí nghiệm thu
-  - Đăng nhập thành công: Snackbar + chuyển trang đúng; thất bại: Snackbar lỗi rõ ràng.
+  - Đăng nhập thành công
   - Tự refresh token khi 401; Logout xóa token và điều hướng về `/login`.
 
 ### Frontend – Gia Khánh (Features & Data Integration)
