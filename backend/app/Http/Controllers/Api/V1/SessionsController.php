@@ -14,7 +14,7 @@ class SessionsController extends Controller
                 'id' => 1,
                 'class_id' => (int) $id,
                 'starts_at' => now()->subHour()->toDateTimeString(),
-                'ends_at' => now()->addHour()->toDateTimeString(),
+                'ends_at' => now()->addHours(1)->toDateTimeString(),
                 'status' => 'open',
                 'qr_ttl' => 15,
             ],

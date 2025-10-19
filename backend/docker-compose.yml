@@ -69,6 +69,7 @@ services:
       - ./:/app
       - vendor_data:/app/vendor
       - cache_data:/app/bootstrap/cache
+      - storage_data:/app/storage
     ports:
       - "8080:80"
     # Uses Dockerfile CMD (docker-entrypoint.sh) to bootstrap and start services
@@ -78,3 +79,4 @@ volumes:
   face_models:
   vendor_data:
   cache_data:
+  storage_data:
