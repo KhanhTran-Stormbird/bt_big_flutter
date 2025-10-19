@@ -1,8 +1,57 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
-class SessionQrPage extends StatelessWidget {
-  const SessionQrPage({super.key});
+import '../../core/utils/error_message.dart';
+import '../../core/widgets/error_view.dart';
+import '../../core/widgets/loading_view.dart';
+import '../sessions/session_controller.dart';
+
+class SessionQrPage extends ConsumerWidget {
+  final int sessionId;
+  const SessionQrPage({super.key, required this.sessionId});
+
   @override
-  Widget build(BuildContext context) =>
-      const Center(child: Text('QR buổi (placeholder)'));
+  Widget build(BuildContext context, WidgetRef ref) {
+    final qrAsync = ref.watch(sessionQrProvider(sessionId));
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('QR buoi #$sessionId'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () => ref.invalidate(sessionQrProvider(sessionId)),
+          ),
+        ],
+      ),
+      body: qrAsync.when(
+        data: (qr) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (qr.svg.isNotEmpty)
+                  SvgPicture.string(
+                    qr.svg,
+                    width: 240,
+                    height: 240,
+                  )
+                else
+                  const Text('Khong co du lieu QR'),
+                const SizedBox(height: 16),
+                Text('Hieu luc: ${qr.ttl} phut'),
+              ],
+            ),
+          ),
+        ),
+        loading: () =>
+            const LoadingView(message: 'Dang sinh ma QR cho buoi hoc...'),
+        error: (error, _) => ErrorView(
+          message: extractErrorMessage(error),
+          onRetry: () => ref.invalidate(sessionQrProvider(sessionId)),
+        ),
+      ),
+    );
+  }
 }
