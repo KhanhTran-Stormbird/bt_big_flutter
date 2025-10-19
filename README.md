@@ -19,20 +19,16 @@ Tài liệu này phân chia công việc cho 4 thành viên (2 backend, 2 fronte
 - Phạm vi thư mục
   - `backend/app/Http/Controllers/Api/V1/AuthController.php`
   - `backend/app/Http/Controllers/Api/V1/UsersController.php`
-  - `backend/app/Http/Middleware/JwtMiddleware.php`
   - `backend/app/Policies/*.php`
   - `backend/app/Http/Requests/Auth/*`
-  - `backend/config/{auth.php,jwt.php,cors.php}`
   - `backend/routes/api.php`
 - Nhiệm vụ
-  - Hoàn thiện JWT: `login/refresh/logout/me`, đổi mật khẩu, trả lỗi JSON chuẩn.
+  - Hoàn thiện phần login đơn giản.
   - Thêm FormRequest validate cho đăng nhập và CRUD user.
   - Hoàn thiện UsersController (CRUD) + `UserRepository`, Gate/Policy:
     - Chỉ Admin: index/store/update/destroy.
-  - Cấu hình CORS phù hợp FE; rate-limit `throttle:login`; tắt `DEV_AUTH_BYPASS` trên staging/prod.
-  - Seed người dùng mẫu (đã có) – kiểm tra tính idempotent.
 - Tiêu chí nghiệm thu
-  - `POST /api/v1/auth/login` trả `{access_token, token_type, expires_in}`; `refresh` hoạt động; `logout` vô hiệu token.
+  - `POST /api/v1/auth/login`
   - `GET /api/v1/me` trả `{id,name,email,role}` chính xác theo DB.
   - Endpoint `/users/*` kiểm soát quyền theo role.
 
@@ -63,24 +59,21 @@ Tài liệu này phân chia công việc cho 4 thành viên (2 backend, 2 fronte
   - `POST /api/v1/sessions/{id}/qr` trả `{svg, ttl}`; `POST /api/v1/attendance/scan-qr` trả `{session_token}`.
   - Excel/PDF tải về đúng nội dung, theo bộ lọc.
 
-### Frontend – Tạ Ngọc Hà (Auth, Shell, Routing, Core)
+### Frontend – Tạ Ngọc Hà (Auth, Routing, Core-Dashboard)
 
 - Phạm vi thư mục
   - `frontend/lib/features/auth/*`
-  - `frontend/lib/features/shell/*`
   - `frontend/lib/router.dart`
   - `frontend/lib/core/*` (constants, theme, widgets)
-  - `.env`, `.env.production`, `frontend/lib/main.dart`
+  - `.env`, `frontend/lib/main.dart`
   - Dịch vụ: `frontend/lib/data/services/{auth_interceptor.dart,secure_store.dart,api_client.dart}`
 - Nhiệm vụ
-  - Hoàn thiện Login UI/UX: hiển thị SnackBar thành công/thất bại; redirect theo role:
+  - Hoàn thiện Login UI/UX:
+    - login → `/login`.
     - admin → `/dashboard/admin`, lecturer → `/dashboard/lecturer`, còn lại → `/dashboard/student`.
-  - Lưu token vào `SecureStore`; `AuthInterceptor` tự gắn Bearer & tự refresh 401.
-  - Route guard: chưa đăng nhập → `/login`; đã đăng nhập → dashboard đúng vai trò.
-  - Xây skeleton dashboard cho Lecturer/Admin; Student dùng `ShellPage` dạng tabs.
   - Quản lý cấu hình bằng `.env` (flutter_dotenv) cho `API_BASE_URL`, `DEV_AUTH_BYPASS`.
 - Tiêu chí nghiệm thu
-  - Đăng nhập thành công: Snackbar + chuyển trang đúng; thất bại: Snackbar lỗi rõ ràng.
+  - Đăng nhập thành công
   - Tự refresh token khi 401; Logout xóa token và điều hướng về `/login`.
 
 ### Frontend – Gia Khánh (Features & Data Integration)
