@@ -35,7 +35,7 @@ class SessionDetailPage extends ConsumerWidget {
 
     if (sessionAsync.hasError && session == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Chi tiet buoi hoc')),
+        appBar: AppBar(title: const Text('Chi tiết buổi học')),
         body: ErrorView(
           message: extractErrorMessage(sessionAsync.error!),
           onRetry: () => ref.invalidate(sessionDetailProvider(sessionId)),
@@ -44,14 +44,14 @@ class SessionDetailPage extends ConsumerWidget {
     }
     if (sessionAsync.isLoading && session == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Chi tiet buoi hoc')),
-        body: const LoadingView(message: 'Dang tai thong tin buoi hoc...'),
+        appBar: AppBar(title: const Text('Chi tiết buổi học')),
+        body: const LoadingView(message: 'Đang tải thông tin buổi học...'),
       );
     }
     if (session == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Chi tiet buoi hoc')),
-        body: const ErrorView(message: 'Khong tim thay thong tin buoi hoc.'),
+        appBar: AppBar(title: const Text('Chi tiết buổi học')),
+        body: const ErrorView(message: 'Không tìm thấy thông tin buổi học...'),
       );
     }
 
@@ -59,16 +59,16 @@ class SessionDetailPage extends ConsumerWidget {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('Dong buoi hoc'),
-          content: const Text('Ban co chac muon dong buoi nay?'),
+          title: const Text('Đóng buổi học'),
+          content: const Text('Bạn có chắc muốn đóng buổi học này?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(false),
-              child: const Text('Huy'),
+              child: const Text('Huỷ'),
             ),
             FilledButton(
               onPressed: () => Navigator.of(ctx).pop(true),
-              child: const Text('Dong'),
+              child: const Text('Đóng'),
             ),
           ],
         ),
@@ -104,16 +104,16 @@ class SessionDetailPage extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Thong tin buoi hoc',
+                    'Thông tin buổi học',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 12),
-                  Text('Lop: ${session.classId}'),
-                  Text('Bat dau: ${formatter.format(session.startsAt)}'),
-                  Text('Ket thuc: ${formatter.format(session.endsAt)}'),
-                  Text('Trang thai: ${_statusLabel(session.status)}'),
+                  Text('Lớp: ${session.classId}'),
+                  Text('Bắt đầu: ${formatter.format(session.startsAt)}'),
+                  Text('Kết thúc: ${formatter.format(session.endsAt)}'),
+                  Text('Trạng thái: ${_statusLabel(session.status)}'),
                   if (session.qrTtl != null)
-                    Text('QR TTL: ${session.qrTtl} phut'),
+                    Text('Hiệu lực của QR: ${session.qrTtl} phút'),
                 ],
               ),
             ),
@@ -123,14 +123,14 @@ class SessionDetailPage extends ConsumerWidget {
             onPressed: () =>
                 context.push('/sessions/$sessionId/qr', extra: session),
             icon: const Icon(Icons.qr_code_2),
-            label: const Text('Xem ma QR'),
+            label: const Text('Xem mã QR'),
           ),
           const SizedBox(height: 12),
           if (canManage && session.status != 'closed')
             OutlinedButton.icon(
               onPressed: closeSession,
               icon: const Icon(Icons.lock),
-              label: const Text('Dong buoi'),
+              label: const Text('Đóng buổi'),
             ),
         ],
       ),
@@ -141,11 +141,11 @@ class SessionDetailPage extends ConsumerWidget {
 String _statusLabel(String status) {
   switch (status) {
     case 'open':
-      return 'Dang dien ra';
+      return 'Đang diễn ra';
     case 'closed':
-      return 'Da dong';
+      return 'Đã đóng';
     case 'scheduled':
     default:
-      return 'Chua bat dau';
+      return 'Chưa bắt đầu';
   }
 }
