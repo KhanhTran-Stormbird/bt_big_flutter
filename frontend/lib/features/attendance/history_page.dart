@@ -55,7 +55,11 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
                 ...classes.map(
                   (c) => DropdownMenuItem<int?>(
                     value: c.id,
-                    child: Text(c.name),
+                    child: Text(
+                      c.subject.isNotEmpty
+                          ? '${c.name} (${c.subject})'
+                          : c.name,
+                    ),
                   ),
                 ),
               ],
@@ -102,7 +106,10 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
 class _HistoryList extends StatelessWidget {
   final List<AttendanceModel> items;
   final DateFormat formatter;
-  const _HistoryList({required this.items, required this.formatter});
+  const _HistoryList({
+    required this.items,
+    required this.formatter,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -111,7 +118,12 @@ class _HistoryList extends StatelessWidget {
     }
     return Column(
       children: items
-          .map((item) => _HistoryTile(item: item, formatter: formatter))
+          .map(
+            (item) => _HistoryTile(
+              item: item,
+              formatter: formatter,
+            ),
+          )
           .toList(),
     );
   }
@@ -121,7 +133,10 @@ class _HistoryTile extends StatelessWidget {
   final AttendanceModel item;
   final DateFormat formatter;
 
-  const _HistoryTile({required this.item, required this.formatter});
+  const _HistoryTile({
+    required this.item,
+    required this.formatter,
+  });
 
   Color _statusColor(String status) {
     switch (status.toLowerCase()) {
@@ -177,7 +192,7 @@ class _HistoryTile extends StatelessWidget {
                 color: AppColors.textPrimary,
               ),
         ),
-        subtitle: Text('Buổi #${item.sessionId}'),
+        subtitle: Text(_subtitleText()),
         trailing: Text(
           _statusLabel(item.status),
           style: TextStyle(
@@ -187,5 +202,14 @@ class _HistoryTile extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _subtitleText() {
+    final className = item.className ?? '';
+    final subject = item.classSubject ?? '';
+    final sessionLabel = 'Buổi #${item.sessionId}';
+    if (className.isEmpty) return sessionLabel;
+    if (subject.isEmpty) return '$className • $sessionLabel';
+    return '$className ($subject) • $sessionLabel';
   }
 }

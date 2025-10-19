@@ -20,8 +20,10 @@ class ReportRepo {
 
   Future<ReportSummary> summary({int? classId}) async {
     return _wrap('summary', () async {
-      final res = await _dio
-          .get('/reports/attendance', queryParameters: {'class_id': classId});
+      final query = <String, dynamic>{};
+      if (classId != null) query['class_id'] = classId;
+      final res =
+          await _dio.get('/reports/attendance', queryParameters: query);
       return ReportSummary.fromJson(res.data);
     });
   }
@@ -31,9 +33,11 @@ class ReportRepo {
     int? classId,
   }) async {
     return _wrap('export', () async {
+      final query = <String, dynamic>{};
+      if (classId != null) query['class_id'] = classId;
       final res = await _dio.get(
         '/reports/attendance/$format',
-        queryParameters: {'class_id': classId},
+        queryParameters: query,
         options: Options(responseType: ResponseType.bytes),
       );
 

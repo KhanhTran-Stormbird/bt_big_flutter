@@ -19,20 +19,16 @@ Tài liệu này phân chia công việc cho 4 thành viên (2 backend, 2 fronte
 - Phạm vi thư mục
   - `backend/app/Http/Controllers/Api/V1/AuthController.php`
   - `backend/app/Http/Controllers/Api/V1/UsersController.php`
-  - `backend/app/Http/Middleware/JwtMiddleware.php`
   - `backend/app/Policies/*.php`
   - `backend/app/Http/Requests/Auth/*`
-  - `backend/config/{auth.php,jwt.php,cors.php}`
   - `backend/routes/api.php`
 - Nhiệm vụ
-  - Hoàn thiện JWT: `login/refresh/logout/me`, đổi mật khẩu, trả lỗi JSON chuẩn.
+  - Hoàn thiện phần login đơn giản.
   - Thêm FormRequest validate cho đăng nhập và CRUD user.
   - Hoàn thiện UsersController (CRUD) + `UserRepository`, Gate/Policy:
     - Chỉ Admin: index/store/update/destroy.
-  - Cấu hình CORS phù hợp FE; rate-limit `throttle:login`; tắt `DEV_AUTH_BYPASS` trên staging/prod.
-  - Seed người dùng mẫu (đã có) – kiểm tra tính idempotent.
 - Tiêu chí nghiệm thu
-  - `POST /api/v1/auth/login` trả `{access_token, token_type, expires_in}`; `refresh` hoạt động; `logout` vô hiệu token.
+  - `POST /api/v1/auth/login`
   - `GET /api/v1/me` trả `{id,name,email,role}` chính xác theo DB.
   - Endpoint `/users/*` kiểm soát quyền theo role.
 

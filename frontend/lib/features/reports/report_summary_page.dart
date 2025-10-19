@@ -39,7 +39,7 @@ class _ReportSummaryPageState extends ConsumerState<ReportSummaryPage> {
         );
       } else if (path != null) {
         messenger.showSnackBar(
-          SnackBar(content: Text('Da tai file: $path')),
+          SnackBar(content: Text('Đã tải file: $path')),
         );
       }
     }
@@ -48,18 +48,18 @@ class _ReportSummaryPageState extends ConsumerState<ReportSummaryPage> {
       padding: const EdgeInsets.all(16),
       children: [
         Text(
-          'Bao cao diem danh',
+          'Báo cáo điểm danh',
           style: Theme.of(context).textTheme.titleLarge,
         ),
         const SizedBox(height: 12),
         classesAsync.when(
           data: (classes) => DropdownButtonFormField<int?>(
             value: selectedClassId,
-            decoration: const InputDecoration(labelText: 'Loc theo lop'),
+            decoration: const InputDecoration(labelText: 'Lọc theo lớp'),
             items: [
               const DropdownMenuItem<int?>(
                 value: null,
-                child: Text('Tat ca lop'),
+                child: Text('Tất cả lớp'),
               ),
               ...classes.map(
                 (c) => DropdownMenuItem<int?>(
@@ -80,7 +80,7 @@ class _ReportSummaryPageState extends ConsumerState<ReportSummaryPage> {
           error: (error, _) => Padding(
             padding: const EdgeInsets.symmetric(vertical: 12),
             child: Text(
-              'Khong tai duoc lop: ${extractErrorMessage(error)}',
+              'Không tải được lớp: ${extractErrorMessage(error)}',
               style: const TextStyle(color: Colors.red),
             ),
           ),
@@ -89,7 +89,7 @@ class _ReportSummaryPageState extends ConsumerState<ReportSummaryPage> {
         summaryAsync.when(
           data: (summary) => _SummaryCard(summary),
           loading: () =>
-              const LoadingView(message: 'Dang tai bao cao tong hop...'),
+              const LoadingView(message: 'Đang tải báo cáo tổng hợp...'),
           error: (error, _) => ErrorView(
             message: extractErrorMessage(error),
             onRetry: () =>
@@ -106,7 +106,7 @@ class _ReportSummaryPageState extends ConsumerState<ReportSummaryPage> {
                 child: OutlinedButton.icon(
                   onPressed: () => export('xlsx'),
                   icon: const Icon(Icons.table_view),
-                  label: const Text('Export Excel'),
+                  label: const Text('Xuất Excel'),
                 ),
               ),
               const SizedBox(width: 12),
@@ -114,7 +114,7 @@ class _ReportSummaryPageState extends ConsumerState<ReportSummaryPage> {
                 child: OutlinedButton.icon(
                   onPressed: () => export('pdf'),
                   icon: const Icon(Icons.picture_as_pdf),
-                  label: const Text('Export PDF'),
+                  label: const Text('Xuất PDF'),
                 ),
               ),
             ],
@@ -138,15 +138,15 @@ class _SummaryCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             _MetricBox(
-              label: 'Buoi hoc',
+              label: 'Buổi học',
               value: summary.totalSessions.toString(),
             ),
             _MetricBox(
-              label: 'Co mat',
+              label: 'Có mặt',
               value: summary.totalPresent.toString(),
             ),
             _MetricBox(
-              label: 'Vang',
+              label: 'Vắng',
               value: summary.totalAbsent.toString(),
             ),
           ],

@@ -28,7 +28,7 @@ class ReportsController extends Controller
 
         $summary = $this->reportRepository->getAttendanceSummary($filters);
 
-        return response()->json($summary);
+        return response()->json(['data' => $summary]);
     }
 
     public function exportExcel(Request $request)
@@ -37,9 +37,9 @@ class ReportsController extends Controller
             'class_id' => 'sometimes|integer|exists:classes,id',
         ]);
 
-        $summary = $this->reportRepository->getAttendanceSummary($filters);
+        $details = $this->reportRepository->getAttendanceDetails($filters);
 
-        return Excel::download(new AttendanceExport($summary), 'attendance_report.xlsx');
+        return Excel::download(new AttendanceExport($details), 'attendance_report.xlsx');
     }
 
     public function exportPdf(Request $request)
@@ -48,9 +48,9 @@ class ReportsController extends Controller
             'class_id' => 'sometimes|integer|exists:classes,id',
         ]);
 
-        $summary = $this->reportRepository->getAttendanceSummary($filters);
+        $details = $this->reportRepository->getAttendanceDetails($filters);
 
-        $pdf = Pdf::loadView('reports.attendance', ['summary' => $summary]);
+        $pdf = Pdf::loadView('reports.attendance', ['summary' => $details]);
 
         return $pdf->download('attendance_report.pdf');
     }
