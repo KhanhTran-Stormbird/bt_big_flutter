@@ -15,11 +15,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        if (User::count() === 0) {
-            $this->call([
-                UsersSeeder::class,
-                DemoDataSeeder::class,
-            ]);
-        }
+        $this->call([
+            UsersSeeder::class,
+            DemoDataSeeder::class,
+        ]);
     }
 }

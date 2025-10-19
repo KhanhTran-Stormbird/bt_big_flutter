@@ -2,65 +2,74 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Http\Controllers\Controller;
+use App\Repositories\AttendanceRepository;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
-use App\Services\FaceService;
-use App\Models\Attendance;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Cache;
 
 class AttendanceController extends Controller
 {
-    public function checkIn(Request $request, FaceService $face)
+    protected AttendanceRepository $attendanceRepository;
+
+    public function __construct(AttendanceRepository $attendanceRepository)
     {
-        $request->validate([
-            'session_token' => 'required|string',
-            'image' => 'required|image|max:5120',
-        ]);
-
-        // TODO: verify session_token via QrService; for now, map demo token → session_id 1
-        $sessionToken = $request->string('session_token');
-        $sessionId = $sessionToken === 'demo-session-token' ? 1 : 1;
-
-        $user = Auth::guard('api')->user();
-        $stored = $request->file('image')->store('sessions/'.$sessionId.'/users/'.$user->id, 'checkins');
-        $absolute = Storage::disk('checkins')->path($stored);
-
-        $verify = $face->verify($user, $absolute);
-        $status = $verify['is_match'] ? 'present' : 'suspect';
-
-        $att = Attendance::updateOrCreate(
-            ['session_id' => $sessionId, 'student_id' => $user->id],
-            [
-                'status' => $status,
-                'method' => 'face',
-                'checked_at' => now(),
-                'distance' => $verify['distance'],
-                'image_path' => $stored,
-            ]
-        );
-
-        return response()->json([
-            'id' => $att->id,
-            'session_id' => $sessionId,
-            'student_id' => $user->id,
-            'status' => $att->status,
-            'checked_at' => $att->checked_at->toDateTimeString(),
-            'distance' => $att->distance,
-        ]);
+        $this->attendanceRepository = $attendanceRepository;
     }
 
-    public function history(Request $request)
+    public function checkIn(Request $request): JsonResponse
     {
-        return response()->json([
-            [
-                'id' => 1,
-                'session_id' => 1,
-                'student_id' => 1,
-                'status' => 'present',
-                'checked_at' => now()->subDay()->toDateTimeString(),
-                'distance' => 0.42,
-            ],
+        $data = $request->validate([
+            'session_token' => 'required|string',
+            'image' => 'required|image',
         ]);
+
+        $cacheKey = "session_token:{$data['session_token']}";
+        $tokenData = Cache::get($cacheKey);
+
+        if (!$tokenData) {
+            return response()->json(['message' => 'Invalid or expired session token.'], 400);
+        }
+
+        // Invalidate the token after use
+        Cache::forget($cacheKey);
+
+        try {
+            $attendance = $this->attendanceRepository->createFromQr(
+                $tokenData['session_id'],
+                $tokenData['student_id'],
+                $request->file('image')
+            );
+            return response()->json($attendance, 201);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 400);
+        }
+    }
+
+    public function history(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $filters = $request->validate([
+            'class_id' => 'sometimes|integer|exists:classes,id',
+            'student_id' => 'sometimes|integer|exists:users,id',
+        ]);
+
+        if (!$user && $this->shouldAuthorize()) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+
+        // Students can only see their own history
+        if ($user && $user->role === 'student') {
+            $filters['student_id'] = $user->id;
+        }
+
+        $history = $this->attendanceRepository->getHistory($filters);
+
+        return response()->json($history);
+    }
+
+    protected function shouldAuthorize(): bool
+    {
+        return (bool) config('api.require_auth', false);
     }
 }
