@@ -1,12 +1,16 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-
 use App\Http\Controllers\Api\V1\{
-  AuthController, UsersController, ClassesController, SessionsController,
-  AttendanceController, ReportsController, QrController
+    AuthController,
+    UsersController,
+    ClassesController,
+    SessionsController,
+    AttendanceController,
+    ReportsController,
+    QrController
 };
 use App\Http\Controllers\Api\V1\FaceSamplesController;
+use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
   // Auth

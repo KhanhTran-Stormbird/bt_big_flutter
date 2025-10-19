@@ -1,6 +1,16 @@
 #!/usr/bin/env sh
 set -e
 
+echo "[entrypoint] Ensuring writable runtime directories"
+mkdir -p /app/storage/logs \
+  /app/storage/app/public \
+  /app/storage/framework/cache \
+  /app/storage/framework/sessions \
+  /app/storage/framework/views \
+  /app/bootstrap/cache
+chown -R www-data:www-data /app/storage /app/bootstrap/cache || true
+chmod -R ug+rwX /app/storage /app/bootstrap/cache || true
+
 echo "[entrypoint] Installing PHP dependencies (composer install)"
 composer install --no-interaction --prefer-dist
 
@@ -20,6 +30,9 @@ echo "[entrypoint] Running database migrations / seed"
 php artisan migrate --force
 php artisan db:seed --force || true
 
+echo "[entrypoint] Fixing ownership after artisan commands"
+chown -R www-data:www-data /app/storage /app/bootstrap/cache || true
+chmod -R ug+rwX /app/storage /app/bootstrap/cache || true
+
 echo "[entrypoint] Starting supervisord"
 exec supervisord -n
-

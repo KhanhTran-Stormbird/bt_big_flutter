@@ -41,9 +41,11 @@ return [
             'provider' => 'users',
         ],
         'api' => [
-            'driver' => 'jwt',
-            'provider' => 'users',
-        ],
+    'driver' => 'jwt',
+    'provider' => 'users',
+    'hash' => false,
+],
+
     ],
 
     /*
@@ -115,5 +117,8 @@ return [
     */
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
+
+    'dev_auth_bypass' => env('DEV_AUTH_BYPASS', false)
+        && in_array(env('APP_ENV', 'production'), ['local', 'development', 'dev', 'testing'], true),
 
 ];
