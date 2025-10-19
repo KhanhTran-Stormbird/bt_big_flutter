@@ -2,11 +2,15 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
+use App\Models\ClassRoom;
+use App\Models\Session;
+use App\Policies\ClassPolicy;
+use App\Policies\SessionPolicy;
 use Illuminate\Cache\RateLimiting\Limit;
-use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -34,5 +38,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('manage-users', fn ($user) => in_array($user->role, ['admin']));
         Gate::define('manage-classes', fn ($user) => in_array($user->role, ['lecturer', 'admin']));
         Gate::define('manage-sessions', fn ($user) => in_array($user->role, ['lecturer', 'admin']));
+
+        Gate::policy(ClassRoom::class, ClassPolicy::class);
+        Gate::policy(Session::class, SessionPolicy::class);
     }
 }
