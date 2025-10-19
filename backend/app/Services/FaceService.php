@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use RuntimeException;
 use Throwable;
 
 class FaceService
@@ -24,22 +25,30 @@ class FaceService
     $disk = Storage::disk('faces');
     $rootPath = $disk->path('');
     if (!is_dir($rootPath)) {
-      mkdir($rootPath, 0755, true);
+      if (!mkdir($rootPath, 0755, true) && !is_dir($rootPath)) {
+        throw new RuntimeException(sprintf('Unable to initialise faces storage at %s', $rootPath));
+      }
     }
 
-    $disk->makeDirectory($directory, 0755, true);
+    $absoluteDirectory = $disk->path($directory);
+    if (!is_dir($absoluteDirectory)) {
+      if (!mkdir($absoluteDirectory, 0755, true) && !is_dir($absoluteDirectory)) {
+        throw new RuntimeException(sprintf('Unable to create directory %s', $absoluteDirectory));
+      }
+    }
 
-    $path = $image->store(
-      $directory,
-      'faces'
-    );
+    $fileName = $image->hashName();
+    $path = $image->storeAs($directory, $fileName, 'faces');
+
+    $absolutePath = $disk->path($path);
+    $hash = $this->hashFile($absolutePath);
 
     try {
-      return DB::transaction(static function () use ($user, $path) {
+      return DB::transaction(static function () use ($user, $path, $hash) {
         return FaceSample::create([
           'user_id' => $user->id,
           'path' => $path,
-          'embedding' => null,
+          'embedding' => ['hash' => $hash],
           'quality_score' => null,
         ]);
       });
@@ -47,6 +56,40 @@ class FaceService
       Storage::disk('faces')->delete($path);
       throw $throwable;
     }
+  }
+
+  /**
+   * Compare the uploaded image with samples stored for a user.
+   *
+   * @param User $user
+   * @param UploadedFile $image
+   * @return array{matched: bool, sample_id: int|null}
+   */
+  public function match(User $user, UploadedFile $image): array
+  {
+    $providedHash = $this->hashFile($image->getRealPath());
+    $disk = Storage::disk('faces');
+
+    foreach ($user->faceSamples as $sample) {
+      $storedHash = $sample->embedding['hash'] ?? null;
+
+      if (!$storedHash) {
+        $storedHash = $this->hashFile($disk->path($sample->path));
+        $sample->update(['embedding' => ['hash' => $storedHash]]);
+      }
+
+      if (hash_equals($storedHash, $providedHash)) {
+        return [
+          'matched' => true,
+          'sample_id' => $sample->id,
+        ];
+      }
+    }
+
+    return [
+      'matched' => false,
+      'sample_id' => null,
+    ];
   }
 
   /**
@@ -63,5 +106,15 @@ class FaceService
       'user_id' => null, // or a mocked user ID
       'distance' => 1.0, // higher means less similar
     ];
+  }
+
+  protected function hashFile(string $path): string
+  {
+    $hash = @hash_file('sha1', $path);
+    if ($hash === false) {
+      throw new RuntimeException("Unable to hash file at {$path}");
+    }
+
+    return $hash;
   }
 }

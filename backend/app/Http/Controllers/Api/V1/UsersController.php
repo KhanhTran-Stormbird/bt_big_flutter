@@ -27,3 +27,4 @@ class UsersController extends Controller
         return response()->json(['message' => 'User deleted (stub)']);
     }
 }
+

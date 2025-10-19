@@ -48,7 +48,12 @@ class AttendanceRepository
         }
 
         $directory = sprintf('sessions/%d/students/%d', $session->id, $student->id);
-        $disk->makeDirectory($directory, 0755, true);
+        $absoluteDirectory = $disk->path($directory);
+        if (!is_dir($absoluteDirectory)) {
+            if (!mkdir($absoluteDirectory, 0755, true) && !is_dir($absoluteDirectory)) {
+                throw new \RuntimeException(sprintf('Unable to create directory %s', $absoluteDirectory));
+            }
+        }
 
         $imagePath = $image->store(
             $directory,

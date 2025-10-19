@@ -52,6 +52,32 @@ class FaceSamplesController extends Controller
         );
     }
 
+    public function match(Request $request, FaceService $face): JsonResponse
+    {
+        $request->validate([
+            'image' => 'required|image|max:5120',
+        ]);
+
+        $user = $this->resolveUser($request);
+
+        if (!$user) {
+            return $this->unauthenticatedResponse();
+        }
+
+        if ($user->faceSamples()->count() === 0) {
+            return response()->json(['message' => 'No enrolled samples found for this user.'], 404);
+        }
+
+        try {
+            $result = $face->match($user, $request->file('image'));
+        } catch (Throwable $exception) {
+            report($exception);
+            return response()->json(['matched' => false, 'message' => 'Face comparison failed.'], 500);
+        }
+
+        return response()->json($result);
+    }
+
     public function destroy(Request $request, int $id): JsonResponse
     {
         $user = $this->resolveUser($request);

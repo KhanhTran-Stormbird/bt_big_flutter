@@ -65,6 +65,7 @@ Route::prefix('v1')->group(function () {
     // Face samples (enroll & manage own face embeddings)
     Route::get('/face-samples', [FaceSamplesController::class, 'index']);
     Route::post('/face-samples', [FaceSamplesController::class, 'store']);
+    Route::post('/face-samples/match', [FaceSamplesController::class, 'match']);
     Route::delete('/face-samples/{id}', [FaceSamplesController::class, 'destroy']);
 
     // Reports
