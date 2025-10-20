@@ -63,7 +63,9 @@ void _showToast(
   required Gradient gradient,
   Duration duration = const Duration(seconds: 2),
 }) {
-  final overlay = Overlay.of(context);
+  
+  final overlay = Overlay.maybeOf(context, rootOverlay: true)
+      ?? Navigator.of(context).overlay;
   if (overlay == null) return;
 
   final overlayEntry = OverlayEntry(
