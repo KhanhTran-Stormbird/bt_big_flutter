@@ -55,7 +55,10 @@ class _CapturePageState extends ConsumerState<CapturePage>
         });
         return;
       }
-      final cam = cameras.first;
+      final cam = cameras.firstWhere(
+        (c) => c.lensDirection == CameraLensDirection.front,
+        orElse: () => cameras.first,
+      );
       final ctrl = CameraController(
         cam,
         ResolutionPreset.medium,
@@ -163,56 +166,77 @@ class _CapturePageState extends ConsumerState<CapturePage>
         busy ? 'Hệ thống đang nhận diện...' : 'Nhấn chụp để điểm danh';
 
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF0B1221), Color(0xFF1F3A93)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+      backgroundColor: Colors.black,
+      body: Stack(
+        alignment: Alignment.center,
+        children: [
+          Positioned.fill(child: _buildCameraPreview()),
+          Container(
+            width: 280,
+            height: 360,
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: busy ? Colors.greenAccent : Colors.white,
+                width: 4,
+              ),
+            ),
           ),
-        ),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Positioned.fill(child: CameraPreview(controller!)),
-            Container(
-              width: 280,
-              height: 360,
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: busy ? Colors.greenAccent : Colors.white,
-                  width: 4,
+          Positioned(
+            bottom: 120,
+            child: Column(
+              children: [
+                FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black,
+                    shape: const CircleBorder(),
+                    padding: const EdgeInsets.all(20),
+                  ),
+                  onPressed: busy ? null : _takePicture,
+                  child: const Icon(Icons.camera_alt, size: 28),
                 ),
-              ),
-            ),
-            Positioned(
-              bottom: 120,
-              child: Column(
-                children: [
-                  FilledButton(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black,
-                      shape: const CircleBorder(),
-                      padding: const EdgeInsets.all(20),
-                    ),
-                    onPressed: busy ? null : _takePicture,
-                    child: const Icon(Icons.camera_alt, size: 28),
+                const SizedBox(height: 24),
+                Text(
+                  statusText,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
                   ),
-                  const SizedBox(height: 24),
-                  Text(
-                    statusText,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
+    );
+  }
+
+  Widget _buildCameraPreview() {
+    final ctrl = controller!;
+    return LayoutBuilder(
+      builder: (_, constraints) {
+        final previewSize = ctrl.value.previewSize;
+        if (previewSize == null) {
+          return CameraPreview(ctrl);
+        }
+        final screenAspect =
+            constraints.maxWidth / (constraints.maxHeight == 0 ? 1 : constraints.maxHeight);
+        final previewAspect =
+            (previewSize.height == 0 || previewSize.width == 0)
+                ? ctrl.value.aspectRatio
+                : previewSize.height / previewSize.width;
+
+        double scale = previewAspect / screenAspect;
+        if (scale < 1) {
+          scale = 1 / scale;
+        }
+
+        return Transform.scale(
+          scale: scale,
+          alignment: Alignment.center,
+          child: CameraPreview(ctrl),
+        );
+      },
     );
   }
 }

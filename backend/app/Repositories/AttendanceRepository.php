@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Models\Attendance;
 use App\Models\Session;
 use App\Models\User;
+use App\Services\FaceService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -12,6 +13,10 @@ use InvalidArgumentException;
 
 class AttendanceRepository
 {
+    public function __construct(protected FaceService $faceService)
+    {
+    }
+
     /**
      * @throws \Exception
      */
@@ -41,6 +46,12 @@ class AttendanceRepository
             throw new InvalidArgumentException('Attendance has already been recorded for this session.');
         }
 
+        $faceResult = $this->faceService->match($student, $image);
+
+        if (!$faceResult['matched']) {
+            throw new InvalidArgumentException('Face verification failed.');
+        }
+
         $disk = Storage::disk('checkins');
         $rootPath = $disk->path('');
         if (!is_dir($rootPath)) {
@@ -61,7 +72,8 @@ class AttendanceRepository
         );
 
         try {
-            $attendance = DB::transaction(static function () use ($session, $student, $imagePath) {
+            $distance = $faceResult['distance'] ?? null;
+            $attendance = DB::transaction(static function () use ($session, $student, $imagePath, $distance) {
                 return Attendance::create([
                     'session_id' => $session->id,
                     'student_id' => $student->id,
@@ -69,6 +81,7 @@ class AttendanceRepository
                     'method' => 'qr',
                     'checked_at' => now(),
                     'image_path' => $imagePath,
+                    'distance' => $distance,
                 ]);
             });
         } catch (\Throwable $throwable) {

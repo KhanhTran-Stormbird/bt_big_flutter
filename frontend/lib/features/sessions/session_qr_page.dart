@@ -16,7 +16,7 @@ class SessionQrPage extends ConsumerWidget {
     final qrAsync = ref.watch(sessionQrProvider(sessionId));
     return Scaffold(
       appBar: AppBar(
-        title: Text('QR buoi #$sessionId'),
+        title: Text('QR buổi #$sessionId'),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -38,15 +38,15 @@ class SessionQrPage extends ConsumerWidget {
                     height: 240,
                   )
                 else
-                  const Text('Khong co du lieu QR'),
+                  const Text('Không có dữ liệu QR'),
                 const SizedBox(height: 16),
-                Text('Hieu luc: ${qr.ttl} phut'),
+                Text('Hiệu lực: ${qr.ttl} phút'),
               ],
             ),
           ),
         ),
         loading: () =>
-            const LoadingView(message: 'Dang sinh ma QR cho buoi hoc...'),
+            const LoadingView(message: 'Đang sinh mã QR cho buổi học...'),
         error: (error, _) => ErrorView(
           message: extractErrorMessage(error),
           onRetry: () => ref.invalidate(sessionQrProvider(sessionId)),

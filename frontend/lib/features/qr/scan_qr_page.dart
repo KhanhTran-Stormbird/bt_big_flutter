@@ -14,14 +14,28 @@ class ScanQrPage extends ConsumerStatefulWidget {
 }
 
 class _ScanQrPageState extends ConsumerState<ScanQrPage> {
+  late final MobileScannerController _controller;
   bool handled = false;
   bool scanning = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = MobileScannerController();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   Future<void> _handleScan(String raw) async {
     setState(() {
       handled = true;
       scanning = true;
     });
+    await _controller.stop();
     final repo = ref.read(attendanceRepoProvider);
     final messenger = ScaffoldMessenger.of(context);
     try {
@@ -34,6 +48,7 @@ class _ScanQrPageState extends ConsumerState<ScanQrPage> {
       );
     } finally {
       if (mounted) {
+        await _controller.start();
         setState(() {
           scanning = false;
           handled = false;
@@ -55,6 +70,7 @@ class _ScanQrPageState extends ConsumerState<ScanQrPage> {
       body: Stack(
         children: [
           MobileScanner(
+            controller: _controller,
             onDetect: (capture) {
               if (handled) return;
               final barcode = capture.barcodes.firstWhere(

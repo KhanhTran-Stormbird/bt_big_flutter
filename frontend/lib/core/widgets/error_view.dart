@@ -16,7 +16,7 @@ class ErrorView extends StatelessWidget {
             const Icon(Icons.error_outline, size: 48, color: Colors.redAccent),
             const SizedBox(height: 12),
             Text(
-              message ?? 'Da xay ra loi.',
+              message ?? 'Đã xảy ra lỗi.',
               style: Theme.of(context).textTheme.bodyLarge,
               textAlign: TextAlign.center,
             ),
@@ -25,7 +25,7 @@ class ErrorView extends StatelessWidget {
               FilledButton.icon(
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh),
-                label: const Text('Thu lai'),
+                label: const Text('Thử lại'),
               ),
             ],
           ],

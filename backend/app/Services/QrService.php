@@ -33,11 +33,17 @@ class QrService
 
     $jsonPayload = json_encode($payload);
 
-    $svg = QrCode::size(256)->generate($jsonPayload);
+    // Force SVG output as a plain string to avoid JSON serialization quirks
+    $svg = QrCode::format('svg')->size(256)->generate($jsonPayload);
+    if (!is_string($svg)) {
+      $svg = (string) $svg;
+    }
 
     return [
-      'svg' => 'data:image/svg+xml;base64,' . base64_encode($svg),
+      // Flutter client expects raw SVG markup, not a data URI
+      'svg' => $svg,
       'ttl' => $ttl,
+      'session_id' => $session->id,
     ];
   }
 
