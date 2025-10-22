@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/colors.dart';
 import '../classes/class_list_page.dart';
 import '../reports/report_summary_page.dart';
-import '../users/user_management_page.dart';
+import '../users/user_management_page.dart' as users;
 import 'admin_dashboard_page.dart';
 import 'admin_profile_page.dart';
 
@@ -19,12 +19,12 @@ class _AdminHomePageState extends ConsumerState<AdminHomePage> {
   int _index = 0;
   final PageStorageBucket _bucket = PageStorageBucket();
 
-  static const _pages = [
-    AdminDashboardPage(),
-    UserManagementPage(),
-    ClassListPage(),
-    ReportSummaryPage(),
-    AdminProfilePage(),
+  static final List<Widget> _pages = [
+    const AdminDashboardPage(),
+    const users.UserManagementPage(),
+    const ClassListPage(),
+    const ReportSummaryPage(),
+    const AdminProfilePage(),
   ];
 
   static const _titles = [
